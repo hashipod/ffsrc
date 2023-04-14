@@ -27,8 +27,8 @@
 #ifndef _SDL_joystick_h
 #define _SDL_joystick_h
 
-#include "SDL_stdinc.h"
 #include "SDL_error.h"
+#include "SDL_stdinc.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -58,7 +58,7 @@ extern DECLSPEC int SDLCALL SDL_NumJoysticks(void);
  * This can be called before any joysticks are opened.
  * If no name can be found, this function returns NULL.
  */
-extern DECLSPEC const char * SDLCALL SDL_JoystickName(int device_index);
+extern DECLSPEC const char *SDLCALL SDL_JoystickName(int device_index);
 
 /**
  * Open a joystick for use.
@@ -68,9 +68,10 @@ extern DECLSPEC const char * SDLCALL SDL_JoystickName(int device_index);
  * the N'th joystick on the system.  This index is the value which will
  * identify this joystick in future joystick events.
  *
- * @return This function returns a joystick identifier, or NULL if an error occurred.
+ * @return This function returns a joystick identifier, or NULL if an error
+ * occurred.
  */
-extern DECLSPEC SDL_Joystick * SDLCALL SDL_JoystickOpen(int device_index);
+extern DECLSPEC SDL_Joystick *SDLCALL SDL_JoystickOpen(int device_index);
 
 /**
  * Returns 1 if the joystick has been opened, or 0 if it has not.
@@ -131,30 +132,32 @@ extern DECLSPEC int SDLCALL SDL_JoystickEventState(int state);
  *
  * @return The state is a value ranging from -32768 to 32767.
  */
-extern DECLSPEC Sint16 SDLCALL SDL_JoystickGetAxis(SDL_Joystick *joystick, int axis);
+extern DECLSPEC Sint16 SDLCALL SDL_JoystickGetAxis(SDL_Joystick *joystick,
+                                                   int axis);
 
 /**
  *  @name Hat Positions
  *  The return value of SDL_JoystickGetHat() is one of the following positions:
  */
 /*@{*/
-#define SDL_HAT_CENTERED	0x00
-#define SDL_HAT_UP		0x01
-#define SDL_HAT_RIGHT		0x02
-#define SDL_HAT_DOWN		0x04
-#define SDL_HAT_LEFT		0x08
-#define SDL_HAT_RIGHTUP		(SDL_HAT_RIGHT|SDL_HAT_UP)
-#define SDL_HAT_RIGHTDOWN	(SDL_HAT_RIGHT|SDL_HAT_DOWN)
-#define SDL_HAT_LEFTUP		(SDL_HAT_LEFT|SDL_HAT_UP)
-#define SDL_HAT_LEFTDOWN	(SDL_HAT_LEFT|SDL_HAT_DOWN)
+#define SDL_HAT_CENTERED 0x00
+#define SDL_HAT_UP 0x01
+#define SDL_HAT_RIGHT 0x02
+#define SDL_HAT_DOWN 0x04
+#define SDL_HAT_LEFT 0x08
+#define SDL_HAT_RIGHTUP (SDL_HAT_RIGHT | SDL_HAT_UP)
+#define SDL_HAT_RIGHTDOWN (SDL_HAT_RIGHT | SDL_HAT_DOWN)
+#define SDL_HAT_LEFTUP (SDL_HAT_LEFT | SDL_HAT_UP)
+#define SDL_HAT_LEFTDOWN (SDL_HAT_LEFT | SDL_HAT_DOWN)
 /*@}*/
 
-/** 
+/**
  *  Get the current state of a POV hat on a joystick
  *
  *  @param[in] hat The hat indices start at index 0.
  */
-extern DECLSPEC Uint8 SDLCALL SDL_JoystickGetHat(SDL_Joystick *joystick, int hat);
+extern DECLSPEC Uint8 SDLCALL SDL_JoystickGetHat(SDL_Joystick *joystick,
+                                                 int hat);
 
 /**
  * Get the ball axis change since the last poll
@@ -163,20 +166,21 @@ extern DECLSPEC Uint8 SDLCALL SDL_JoystickGetHat(SDL_Joystick *joystick, int hat
  *
  * @return This returns 0, or -1 if you passed it invalid parameters.
  */
-extern DECLSPEC int SDLCALL SDL_JoystickGetBall(SDL_Joystick *joystick, int ball, int *dx, int *dy);
+extern DECLSPEC int SDLCALL SDL_JoystickGetBall(SDL_Joystick *joystick,
+                                                int ball, int *dx, int *dy);
 
 /**
  * Get the current state of a button on a joystick
  *
  * @param[in] button The button indices start at index 0.
  */
-extern DECLSPEC Uint8 SDLCALL SDL_JoystickGetButton(SDL_Joystick *joystick, int button);
+extern DECLSPEC Uint8 SDLCALL SDL_JoystickGetButton(SDL_Joystick *joystick,
+                                                    int button);
 
 /**
  * Close a joystick previously opened with SDL_JoystickOpen()
  */
 extern DECLSPEC void SDLCALL SDL_JoystickClose(SDL_Joystick *joystick);
-
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

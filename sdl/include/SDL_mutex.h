@@ -29,8 +29,8 @@
  *  @note These are independent of the other SDL routines.
  */
 
-#include "SDL_stdinc.h"
 #include "SDL_error.h"
+#include "SDL_stdinc.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -41,11 +41,10 @@ extern "C" {
 /** Synchronization functions which can time out return this value
  *  if they time out.
  */
-#define SDL_MUTEX_TIMEDOUT	1
+#define SDL_MUTEX_TIMEDOUT 1
 
 /** This is the timeout value which corresponds to never time out */
-#define SDL_MUTEX_MAXWAIT	(~(Uint32)0)
-
+#define SDL_MUTEX_MAXWAIT (~(Uint32)0)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /** @name Mutex functions                                        */ /*@{*/
@@ -56,15 +55,15 @@ struct SDL_mutex;
 typedef struct SDL_mutex SDL_mutex;
 
 /** Create a mutex, initialized unlocked */
-extern DECLSPEC SDL_mutex * SDLCALL SDL_CreateMutex(void);
+extern DECLSPEC SDL_mutex *SDLCALL SDL_CreateMutex(void);
 
-#define SDL_LockMutex(m)	SDL_mutexP(m)
+#define SDL_LockMutex(m) SDL_mutexP(m)
 /** Lock the mutex
  *  @return 0, or -1 on error
  */
 extern DECLSPEC int SDLCALL SDL_mutexP(SDL_mutex *mutex);
 
-#define SDL_UnlockMutex(m)	SDL_mutexV(m)
+#define SDL_UnlockMutex(m) SDL_mutexV(m)
 /** Unlock the mutex
  *  @return 0, or -1 on error
  *
@@ -87,13 +86,13 @@ struct SDL_semaphore;
 typedef struct SDL_semaphore SDL_sem;
 
 /** Create a semaphore, initialized with value, returns NULL on failure. */
-extern DECLSPEC SDL_sem * SDLCALL SDL_CreateSemaphore(Uint32 initial_value);
+extern DECLSPEC SDL_sem *SDLCALL SDL_CreateSemaphore(Uint32 initial_value);
 
 /** Destroy a semaphore */
 extern DECLSPEC void SDLCALL SDL_DestroySemaphore(SDL_sem *sem);
 
 /**
- * This function suspends the calling thread until the semaphore pointed 
+ * This function suspends the calling thread until the semaphore pointed
  * to by sem has a positive count. It then atomically decreases the semaphore
  * count.
  */
@@ -135,7 +134,7 @@ typedef struct SDL_cond SDL_cond;
 /*@}*/
 
 /** Create a condition variable */
-extern DECLSPEC SDL_cond * SDLCALL SDL_CreateCond(void);
+extern DECLSPEC SDL_cond *SDLCALL SDL_CreateCond(void);
 
 /** Destroy a condition variable */
 extern DECLSPEC void SDLCALL SDL_DestroyCond(SDL_cond *cond);
@@ -163,7 +162,8 @@ extern DECLSPEC int SDLCALL SDL_CondWait(SDL_cond *cond, SDL_mutex *mut);
  *  On some platforms this function is implemented by looping with a delay
  *  of 1 ms, and so should be avoided if possible.
  */
-extern DECLSPEC int SDLCALL SDL_CondWaitTimeout(SDL_cond *cond, SDL_mutex *mutex, Uint32 ms);
+extern DECLSPEC int SDLCALL SDL_CondWaitTimeout(SDL_cond *cond,
+                                                SDL_mutex *mutex, Uint32 ms);
 
 /*@}*/
 
@@ -174,4 +174,3 @@ extern DECLSPEC int SDLCALL SDL_CondWaitTimeout(SDL_cond *cond, SDL_mutex *mutex
 #include "close_code.h"
 
 #endif /* _SDL_mutex_h */
-

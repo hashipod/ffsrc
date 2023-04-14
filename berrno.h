@@ -10,12 +10,12 @@
 #ifdef EINTR
 #undef EINTR
 #endif
-#define EINTR  4
+#define EINTR 4
 
 #ifdef EIO
 #undef EIO
 #endif
-#define EIO    5
+#define EIO 5
 
 #ifdef EAGAIN
 #undef EAGAIN
@@ -35,6 +35,6 @@
 #ifdef EPIPE
 #undef EPIPE
 #endif
-#define EPIPE  32
+#define EPIPE 32
 
 #endif

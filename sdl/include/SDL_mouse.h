@@ -27,8 +27,8 @@
 #ifndef _SDL_mouse_h
 #define _SDL_mouse_h
 
-#include "SDL_stdinc.h"
 #include "SDL_error.h"
+#include "SDL_stdinc.h"
 #include "SDL_video.h"
 
 #include "begin_code.h"
@@ -37,14 +37,14 @@
 extern "C" {
 #endif
 
-typedef struct WMcursor WMcursor;	/**< Implementation dependent */
+typedef struct WMcursor WMcursor; /**< Implementation dependent */
 typedef struct SDL_Cursor {
-	SDL_Rect area;			/**< The area of the mouse cursor */
-	Sint16 hot_x, hot_y;		/**< The "tip" of the cursor */
-	Uint8 *data;			/**< B/W cursor data */
-	Uint8 *mask;			/**< B/W cursor mask */
-	Uint8 *save[2];			/**< Place to save cursor area */
-	WMcursor *wm_cursor;		/**< Window-manager cursor */
+    SDL_Rect area;       /**< The area of the mouse cursor */
+    Sint16 hot_x, hot_y; /**< The "tip" of the cursor */
+    Uint8 *data;         /**< B/W cursor data */
+    Uint8 *mask;         /**< B/W cursor mask */
+    Uint8 *save[2];      /**< Place to save cursor area */
+    WMcursor *wm_cursor; /**< Window-manager cursor */
 } SDL_Cursor;
 
 /* Function prototypes */
@@ -82,12 +82,13 @@ extern DECLSPEC void SDLCALL SDL_WarpMouse(Uint16 x, Uint16 y);
  *
  * Cursors created with this function must be freed with SDL_FreeCursor().
  */
-extern DECLSPEC SDL_Cursor * SDLCALL SDL_CreateCursor
-		(Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y);
+extern DECLSPEC SDL_Cursor *SDLCALL SDL_CreateCursor(Uint8 *data, Uint8 *mask,
+                                                     int w, int h, int hot_x,
+                                                     int hot_y);
 
 /**
  * Set the currently active cursor to the specified one.
- * If the cursor is currently visible, the change will be immediately 
+ * If the cursor is currently visible, the change will be immediately
  * represented on the display.
  */
 extern DECLSPEC void SDLCALL SDL_SetCursor(SDL_Cursor *cursor);
@@ -95,7 +96,7 @@ extern DECLSPEC void SDLCALL SDL_SetCursor(SDL_Cursor *cursor);
 /**
  * Returns the currently active cursor.
  */
-extern DECLSPEC SDL_Cursor * SDLCALL SDL_GetCursor(void);
+extern DECLSPEC SDL_Cursor *SDLCALL SDL_GetCursor(void);
 
 /**
  * Deallocates a cursor created with SDL_CreateCursor().
@@ -119,19 +120,19 @@ extern DECLSPEC int SDLCALL SDL_ShowCursor(int toggle);
  *  Button 4:	Mouse wheel up	 (may also be a real button)
  *  Button 5:	Mouse wheel down (may also be a real button)
  */
-#define SDL_BUTTON(X)		(1 << ((X)-1))
-#define SDL_BUTTON_LEFT		1
-#define SDL_BUTTON_MIDDLE	2
-#define SDL_BUTTON_RIGHT	3
-#define SDL_BUTTON_WHEELUP	4
-#define SDL_BUTTON_WHEELDOWN	5
-#define SDL_BUTTON_X1		6
-#define SDL_BUTTON_X2		7
-#define SDL_BUTTON_LMASK	SDL_BUTTON(SDL_BUTTON_LEFT)
-#define SDL_BUTTON_MMASK	SDL_BUTTON(SDL_BUTTON_MIDDLE)
-#define SDL_BUTTON_RMASK	SDL_BUTTON(SDL_BUTTON_RIGHT)
-#define SDL_BUTTON_X1MASK	SDL_BUTTON(SDL_BUTTON_X1)
-#define SDL_BUTTON_X2MASK	SDL_BUTTON(SDL_BUTTON_X2)
+#define SDL_BUTTON(X) (1 << ((X)-1))
+#define SDL_BUTTON_LEFT 1
+#define SDL_BUTTON_MIDDLE 2
+#define SDL_BUTTON_RIGHT 3
+#define SDL_BUTTON_WHEELUP 4
+#define SDL_BUTTON_WHEELDOWN 5
+#define SDL_BUTTON_X1 6
+#define SDL_BUTTON_X2 7
+#define SDL_BUTTON_LMASK SDL_BUTTON(SDL_BUTTON_LEFT)
+#define SDL_BUTTON_MMASK SDL_BUTTON(SDL_BUTTON_MIDDLE)
+#define SDL_BUTTON_RMASK SDL_BUTTON(SDL_BUTTON_RIGHT)
+#define SDL_BUTTON_X1MASK SDL_BUTTON(SDL_BUTTON_X1)
+#define SDL_BUTTON_X2MASK SDL_BUTTON(SDL_BUTTON_X2)
 /*@}*/
 
 /* Ends C function definitions when using C++ */
