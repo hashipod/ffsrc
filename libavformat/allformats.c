@@ -1,26 +1,26 @@
 #include "avformat.h"
 
-// ¼òµ¥µÄ×¢²á/³õÊ¼»¯º¯Êý£¬°ÑÏàÓ¦µÄÐ­Òé£¬ÎÄ¼þ¸ñÊ½£¬½âÂëÆ÷µÈÓÃÏàÓ¦µÄÁ´±í´®ÆðÀ´±ãÓÚ²éÕÒ¡£
+// ç®€å•çš„æ³¨å†Œ/åˆå§‹åŒ–å‡½æ•°ï¼ŒæŠŠç›¸åº”çš„åè®®ï¼Œæ–‡ä»¶æ ¼å¼ï¼Œè§£ç å™¨ç­‰ç”¨ç›¸åº”çš„é“¾è¡¨ä¸²èµ·æ¥ä¾¿äºŽæŸ¥æ‰¾ã€‚
 
 extern URLProtocol file_protocol;
 
 void av_register_all(void)
 {
-    // inited ±äÁ¿ÉùÃ÷³Éstatic£¬×öÒ»ÏÂ±È½ÏÊÇÎªÁË±ÜÃâ´Ëº¯Êý¶à´Îµ÷ÓÃ¡£
+    // inited å˜é‡å£°æ˜Žæˆstaticï¼Œåšä¸€ä¸‹æ¯”è¾ƒæ˜¯ä¸ºäº†é¿å…æ­¤å‡½æ•°å¤šæ¬¡è°ƒç”¨ã€‚
     static int inited = 0;
 
     if (inited != 0)
 	return;
     inited = 1;
-    // ffplay °ÑCPU µ±×öÒ»¸ö¹ãÒåµÄDSP¡£ÓÐÐ©¼ÆËã¿ÉÒÔÓÃCPU ×Ô´øµÄ¼ÓËÙÖ¸ÁîÀ´ÓÅ»¯£¬
-    // ffplay °ÑÕâÀàº¯Êý¶ÀÁ¢³öÀ´·Åµ½dsputil.h ºÍdsputil.c ÎÄ¼þÖÐ£¬ÓÃº¯ÊýÖ¸ÕëµÄ·½·¨Ó³Éäµ½¸÷¸öCPU ¾ßÌåµÄ¼ÓËÙÓÅ»¯ÊµÏÖº¯Êý£¬´Ë´¦³õÊ¼»¯ÕâÐ©º¯ÊýÖ¸Õë¡£
+    // ffplay æŠŠCPU å½“åšä¸€ä¸ªå¹¿ä¹‰çš„DSPã€‚æœ‰äº›è®¡ç®—å¯ä»¥ç”¨CPU è‡ªå¸¦çš„åŠ é€ŸæŒ‡ä»¤æ¥ä¼˜åŒ–ï¼Œ
+    // ffplay æŠŠè¿™ç±»å‡½æ•°ç‹¬ç«‹å‡ºæ¥æ”¾åˆ°dsputil.h å’Œdsputil.c æ–‡ä»¶ä¸­ï¼Œç”¨å‡½æ•°æŒ‡é’ˆçš„æ–¹æ³•æ˜ å°„åˆ°å„ä¸ªCPU å…·ä½“çš„åŠ é€Ÿä¼˜åŒ–å®žçŽ°å‡½æ•°ï¼Œæ­¤å¤„åˆå§‹åŒ–è¿™äº›å‡½æ•°æŒ‡é’ˆã€‚
     avcodec_init();
 
-    // °ÑËùÓÐµÄ½âÂëÆ÷ÓÃÁ´±íµÄ·½Ê½¶¼´®Á¬ÆðÀ´£¬Á´±íÍ·Ö¸ÕëÊÇfirst_avcodec¡£
+    // æŠŠæ‰€æœ‰çš„è§£ç å™¨ç”¨é“¾è¡¨çš„æ–¹å¼éƒ½ä¸²è¿žèµ·æ¥ï¼Œé“¾è¡¨å¤´æŒ‡é’ˆæ˜¯first_avcodecã€‚
     avcodec_register_all();
 
-    // °ÑËùÓÐµÄÊäÈëÎÄ¼þ¸ñÊ½ÓÃÁ´±íµÄ·½Ê½¶¼´®Á¬ÆðÀ´£¬Á´±íÍ·Ö¸ÕëÊÇfirst_iformat¡£
+    // æŠŠæ‰€æœ‰çš„è¾“å…¥æ–‡ä»¶æ ¼å¼ç”¨é“¾è¡¨çš„æ–¹å¼éƒ½ä¸²è¿žèµ·æ¥ï¼Œé“¾è¡¨å¤´æŒ‡é’ˆæ˜¯first_iformatã€‚
     avidec_init();
-    // °ÑËùÓÐµÄÊäÈëÐ­ÒéÓÃÁ´±íµÄ·½Ê½¶¼´®Á¬ÆðÀ´£¬±ÈÈçtcp/udp/file µÈ£¬Á´±íÍ·Ö¸ÕëÊÇfirst_protocol¡£
+    // æŠŠæ‰€æœ‰çš„è¾“å…¥åè®®ç”¨é“¾è¡¨çš„æ–¹å¼éƒ½ä¸²è¿žèµ·æ¥ï¼Œæ¯”å¦‚tcp/udp/file ç­‰ï¼Œé“¾è¡¨å¤´æŒ‡é’ˆæ˜¯first_protocolã€‚
     register_protocol(&file_protocol);
 }

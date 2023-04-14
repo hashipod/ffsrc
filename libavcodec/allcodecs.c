@@ -3,7 +3,7 @@
 extern AVCodec truespeech_decoder;
 extern AVCodec msrle_decoder;
 
-// ¼òµ¥µÄ×¢²á/³õÊ¼»¯º¯Êı£¬°Ñ±à½âÂëÆ÷ÓÃÏàÓ¦µÄÁ´±í´®ÆğÀ´±ãÓÚ²éÕÒÊ¶±ğ¡£
+// ç®€å•çš„æ³¨å†Œ/åˆå§‹åŒ–å‡½æ•°ï¼ŒæŠŠç¼–è§£ç å™¨ç”¨ç›¸åº”çš„é“¾è¡¨ä¸²èµ·æ¥ä¾¿äºæŸ¥æ‰¾è¯†åˆ«ã€‚
 void avcodec_register_all(void)
 {
     static int inited = 0;
@@ -12,8 +12,8 @@ void avcodec_register_all(void)
 	return;
 
     inited = 1;
-    // °Ñmsrle_decoder ½âÂëÆ÷´®½Óµ½½âÂëÆ÷Á´±í£¬Á´±íÍ·Ö¸ÕëÊÇfirst_avcodec¡£
+    // æŠŠmsrle_decoder è§£ç å™¨ä¸²æ¥åˆ°è§£ç å™¨é“¾è¡¨ï¼Œé“¾è¡¨å¤´æŒ‡é’ˆæ˜¯first_avcodecã€‚
     register_avcodec(&msrle_decoder);
-    // °Ñtruespeech_decoder ½âÂëÆ÷´®½Óµ½½âÂëÆ÷Á´±í£¬Á´±íÍ·Ö¸ÕëÊÇfirst_avcodec¡£
+    // æŠŠtruespeech_decoder è§£ç å™¨ä¸²æ¥åˆ°è§£ç å™¨é“¾è¡¨ï¼Œé“¾è¡¨å¤´æŒ‡é’ˆæ˜¯first_avcodecã€‚
     register_avcodec(&truespeech_decoder);
 }

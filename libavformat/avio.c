@@ -2,8 +2,8 @@
 #include "avformat.h"
 
 URLProtocol *first_protocol = NULL;
-// ��URLProtocol ���������������������ڲ��ҡ�
-// register_protocol ʵ�ʾ��Ǵ����ĸ���URLProtocol��ȫ�ֱ�ͷΪfirst_protocol��
+// 把URLProtocol 串联起来做成链表，便于查找。
+// register_protocol 实际就是串联的各个URLProtocol，全局表头为first_protocol。
 int register_protocol(URLProtocol *protocol)
 {
     URLProtocol **p;
@@ -14,8 +14,8 @@ int register_protocol(URLProtocol *protocol)
     protocol->next = NULL;
     return 0;
 }
-// �򿪹��������ļ����˺�����Ҫ���������߼������ȴ��ļ�·�����з����Э���ַ�����proto_str�ַ������У�
-// ���ű���URLProtocol ��������ƥ��proto_str�ַ������е��ַ�����ȷ��ʹ�õ�Э�飬��������Ӧ���ļ�Э��Ĵ򿪺����������ļ���
+// 打开广义输入文件。此函数主要有三部分逻辑，首先从文件路径名中分离出协议字符串到proto_str字符数组中，
+// 接着遍历URLProtocol 链表查找匹配proto_str字符数组中的字符串来确定使用的协议，最后调用相应的文件协议的打开函数打开输入文件。
 int url_open(URLContext **puc, const char *filename, int flags)
 {
     URLContext *uc;
@@ -24,7 +24,7 @@ int url_open(URLContext **puc, const char *filename, int flags)
     char proto_str[128], *q;
     int err;
 
-    // ��ð�źͽ�������Ϊ�߽���ļ����з������Э���ַ�����proto_str�ַ�����
+    // 以冒号和结束符作为边界从文件名中分离出的协议字符串到proto_str字符数组
     p = filename;
     q = proto_str;
     while (*p != '\0' &&  *p != ':')
@@ -36,7 +36,7 @@ int url_open(URLContext **puc, const char *filename, int flags)
 	p++;
     }
     // if the protocol has length 1, we consider it is a dos drive
-    // ���Э���ַ���ֻ��һ���ַ������Ǿ���Ϊ��windows �µ��߼��̷����϶���file��
+    // 如果协议字符串只有一个字符，我们就认为是windows 下的逻辑盘符，断定是file。
     if (*p == '\0' || (q - proto_str) <= 1)
     {
     file_proto:
@@ -47,7 +47,7 @@ int url_open(URLContext **puc, const char *filename, int flags)
 	*q = '\0';
     }
 
-    // ����URLProtocol ����ƥ��ʹ�õ�Э�飬���û���ҵ��ͷ��ش����롣
+    // 遍历URLProtocol 链表匹配使用的协议，如果没有找到就返回错误码。
     up = first_protocol;
     while (up != NULL)
     {
@@ -58,8 +58,8 @@ int url_open(URLContext **puc, const char *filename, int flags)
     err = -ENOENT;
     goto fail;
 found:
-    // ����ҵ��ͷ���URLContext �ṹ�ڴ棬�ر�ע���ڴ��СҪ�����ļ������ȣ��ļ����ַ����������0 
-    // ҲҪԤ�ȷ���1���ֽ��ڴ棬��1 ���ֽھ���URLContext�ṹ�е�char filename[1]
+    // 如果找到就分配URLContext 结构内存，特别注意内存大小要加上文件名长度，文件名字符串结束标记0 
+    // 也要预先分配1个字节内存，这1 个字节就是URLContext结构中的char filename[1]
     uc = av_malloc(sizeof(URLContext) + strlen(filename));
     if (!uc)
     {
@@ -70,7 +70,7 @@ found:
     uc->prot = up;
     uc->flags = flags;
     uc->max_packet_size = 0; // default: stream file
-    // ���ŵ�����ӦЭ����ļ��򿪺���
+    // 接着调用相应协议的文件打开函数
     err = up->url_open(uc, filename, flags);
     if (err < 0)
     {
@@ -84,7 +84,7 @@ fail:
     *puc = NULL;
     return err;
 }
-// �򵥵���ת���������ײ�Э��Ķ���������ɶ�������
+// 简单的中转读操作到底层协议的读函数，完成读操作。
 int url_read(URLContext *h, unsigned char *buf, int size)
 {
     int ret;
@@ -94,7 +94,7 @@ int url_read(URLContext *h, unsigned char *buf, int size)
     return ret;
 }
 
-// �򵥵���תseek �������ײ�Э���seek���������seek������
+// 简单的中转seek 操作到底层协议的seek函数，完成seek操作。
 offset_t url_seek(URLContext *h, offset_t pos, int whence)
 {
     offset_t ret;
@@ -104,7 +104,7 @@ offset_t url_seek(URLContext *h, offset_t pos, int whence)
     ret = h->prot->url_seek(h, pos, whence);
     return ret;
 }
-// �򵥵���ת�رղ������ײ�Э��Ĺرպ�������ɹرղ��������ͷ���url_open()������malloc�������ڴ档
+// 简单的中转关闭操作到底层协议的关闭函数，完成关闭操作，并释放在url_open()函数中malloc出来的内存。
 int url_close(URLContext *h)
 {
     int ret;
@@ -113,7 +113,7 @@ int url_close(URLContext *h)
     av_free(h);
     return ret;
 }
-// ȡ������ݰ���С�������0��������ʵ����Ч�ġ�
+// 取最大数据包大小，如果非0，必须是实质有效的。
 int url_get_max_packet_size(URLContext *h)
 {
     return h->max_packet_size;

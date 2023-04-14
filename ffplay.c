@@ -2,9 +2,10 @@
 #include "./libavformat/avformat.h"
 
 #if defined(CONFIG_WIN32)
-#include <sys/types.h>
 #include <sys/timeb.h>
+#include <sys/types.h>
 #include <windows.h>
+
 #else
 #include <fcntl.h>
 #include <sys/time.h>
@@ -12,73 +13,72 @@
 
 #include <time.h>
 
-#include <math.h>
 #include <SDL.h>
 #include <SDL_thread.h>
+#include <math.h>
 
-// SDL ÀïÃæ¶¨ÒåÁËmain º¯Êı£¬ËùÒÔÔÚÕâÀïÈ¡Ïûsdl ÖĞµÄmain ¶¨Òå£¬±ÜÃâÖØ¸´¶¨Òå¡£
+// SDL é‡Œé¢å®šä¹‰äº†main å‡½æ•°ï¼Œæ‰€ä»¥åœ¨è¿™é‡Œå–æ¶ˆsdl ä¸­çš„main å®šä¹‰ï¼Œé¿å…é‡å¤å®šä¹‰ã€‚
 #ifdef CONFIG_WIN32
 #undef main // We don't want SDL to override our main()
 #endif
 
-// µ¼ÈëSDL ¿â¡£
+// å¯¼å…¥SDL åº“ã€‚
 #pragma comment(lib, "SDL.lib")
 
-#define FF_QUIT_EVENT   (SDL_USEREVENT + 2)
+#define FF_QUIT_EVENT (SDL_USEREVENT + 2)
 
 #define MAX_VIDEOQ_SIZE (5 * 256 * 1024)
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
 
 #define VIDEO_PICTURE_QUEUE_SIZE 1
-// ÒôÊÓÆµÊı¾İ°ü/Êı¾İÖ¡¶ÓÁĞÊı¾İ½á¹¹¶¨Òå
-typedef struct PacketQueue
-{
-    AVPacketList *first_pkt, *last_pkt;
-    int size;
-    int abort_request;
-    SDL_mutex *mutex;
-    SDL_cond *cond;
+// éŸ³è§†é¢‘æ•°æ®åŒ…/æ•°æ®å¸§é˜Ÿåˆ—æ•°æ®ç»“æ„å®šä¹‰
+typedef struct PacketQueue {
+  AVPacketList *first_pkt, *last_pkt;
+  int size;
+  int abort_request;
+  SDL_mutex *mutex;
+  SDL_cond *cond;
 } PacketQueue;
 
-// ÊÓÆµÍ¼ÏñÊı¾İ½á¹¹¶¨Òå
-typedef struct VideoPicture
-{
-    SDL_Overlay *bmp;
-    int width, height; // source height & width
+// è§†é¢‘å›¾åƒæ•°æ®ç»“æ„å®šä¹‰
+typedef struct VideoPicture {
+  SDL_Overlay *bmp;
+  int width, height; // source height & width
 } VideoPicture;
-// ×Ü¿ØÊı¾İ½á¹¹£¬°ÑÆäËûºËĞÄÊı¾İ½á¹¹ÕûºÏÔÚÒ»Æğ£¬ÆğÒ»¸öÖĞ×ªµÄ×÷ÓÃ£¬±ãÓÚÔÚ¸÷¸ö×Ó½á¹¹Ö®¼äÌø×ª¡£
-typedef struct VideoState
-{
-    SDL_Thread *parse_tid;		// Demux ½â¸´ÓÃÏß³ÌÖ¸Õë
-    SDL_Thread *video_tid;		// video ½âÂëÏß³ÌÖ¸Õë
+// æ€»æ§æ•°æ®ç»“æ„ï¼ŒæŠŠå…¶ä»–æ ¸å¿ƒæ•°æ®ç»“æ„æ•´åˆåœ¨ä¸€èµ·ï¼Œèµ·ä¸€ä¸ªä¸­è½¬çš„ä½œç”¨ï¼Œä¾¿äºåœ¨å„ä¸ªå­ç»“æ„ä¹‹é—´è·³è½¬ã€‚
+typedef struct VideoState {
+  SDL_Thread *parse_tid; // Demux è§£å¤ç”¨çº¿ç¨‹æŒ‡é’ˆ
+  SDL_Thread *video_tid; // video è§£ç çº¿ç¨‹æŒ‡é’ˆ
 
-    int abort_request;			// Òì³£ÍË³öÇëÇó±ê¼Ç
+  int abort_request; // å¼‚å¸¸é€€å‡ºè¯·æ±‚æ ‡è®°
 
-    AVFormatContext *ic;		// ÊäÈëÎÄ¼ş¸ñÊ½ÉÏÏÂÎÄÖ¸Õë£¬ºÍiformat ÅäÌ×Ê¹ÓÃ
+  AVFormatContext *ic; // è¾“å…¥æ–‡ä»¶æ ¼å¼ä¸Šä¸‹æ–‡æŒ‡é’ˆï¼Œå’Œiformat é…å¥—ä½¿ç”¨
 
-    int audio_stream;			// ÒôÆµÁ÷Ë÷Òı£¬±íÊ¾AVFormatContext ÖĞAVStream *streams[]Êı×éË÷Òı
-    int video_stream;			// ÊÓÆµÁ÷Ë÷Òı£¬±íÊ¾AVFormatContext ÖĞAVStream *streams[]Êı×éË÷Òı
+  int audio_stream; // éŸ³é¢‘æµç´¢å¼•ï¼Œè¡¨ç¤ºAVFormatContext ä¸­AVStream
+                    // *streams[]æ•°ç»„ç´¢å¼•
+  int video_stream; // è§†é¢‘æµç´¢å¼•ï¼Œè¡¨ç¤ºAVFormatContext ä¸­AVStream
+                    // *streams[]æ•°ç»„ç´¢å¼•
 
-    AVStream *audio_st;			// ÒôÆµÁ÷Ö¸Õë
-    AVStream *video_st;			// ÊÓÆµÁ÷Ö¸Õë
+  AVStream *audio_st; // éŸ³é¢‘æµæŒ‡é’ˆ
+  AVStream *video_st; // è§†é¢‘æµæŒ‡é’ˆ
 
-    PacketQueue audioq;			// ÒôÆµÊı¾İÖ¡/Êı¾İ°ü¶ÓÁĞ
-    PacketQueue videoq;			// ÊÓÆµÊı¾İÖ¡/Êı¾İ°ü¶ÓÁĞ
+  PacketQueue audioq; // éŸ³é¢‘æ•°æ®å¸§/æ•°æ®åŒ…é˜Ÿåˆ—
+  PacketQueue videoq; // è§†é¢‘æ•°æ®å¸§/æ•°æ®åŒ…é˜Ÿåˆ—
 
-    VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE];		// ½âÂëºóÊÓÆµÍ¼Ïñ¶ÓÁĞÊı×é
-    double frame_last_delay;					// ÊÓÆµÖ¡ÑÓ³Ù£¬¿É¼òµ¥ÈÏÎªÊÇÏÔÊ¾¼ä¸ôÊ±¼ä
+  VideoPicture pictq[VIDEO_PICTURE_QUEUE_SIZE]; // è§£ç åè§†é¢‘å›¾åƒé˜Ÿåˆ—æ•°ç»„
+  double frame_last_delay; // è§†é¢‘å¸§å»¶è¿Ÿï¼Œå¯ç®€å•è®¤ä¸ºæ˜¯æ˜¾ç¤ºé—´éš”æ—¶é—´
 
-    uint8_t audio_buf[(AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2];	// Êä³öÒôÆµ»º´æ
-    unsigned int audio_buf_size;			// ½âÂëºóÒôÆµÊı¾İ´óĞ¡
-    int audio_buf_index;				// ÒÑÊä³öÒôÆµÊı¾İ´óĞ¡
-    AVPacket audio_pkt;					// Èç¹ûÒ»¸öÒôÆµ°üÖĞÓĞ¶à¸öÖ¡£¬ÓÃÓÚ±£´æÖĞ¼ä×´Ì¬
-    uint8_t *audio_pkt_data;				// ÒôÆµ°üÊı¾İÊ×µØÖ·£¬ÅäºÏaudio_pkt ±£´æÖĞ¼ä×´Ì¬
-    int audio_pkt_size;					// ÒôÆµ°üÊı¾İ´óĞ¡£¬ÅäºÏaudio_pkt ±£´æÖĞ¼ä×´Ì¬
+  uint8_t audio_buf[(AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2]; // è¾“å‡ºéŸ³é¢‘ç¼“å­˜
+  unsigned int audio_buf_size; // è§£ç åéŸ³é¢‘æ•°æ®å¤§å°
+  int audio_buf_index;         // å·²è¾“å‡ºéŸ³é¢‘æ•°æ®å¤§å°
+  AVPacket audio_pkt; // å¦‚æœä¸€ä¸ªéŸ³é¢‘åŒ…ä¸­æœ‰å¤šä¸ªå¸§ï¼Œç”¨äºä¿å­˜ä¸­é—´çŠ¶æ€
+  uint8_t *audio_pkt_data; // éŸ³é¢‘åŒ…æ•°æ®é¦–åœ°å€ï¼Œé…åˆaudio_pkt ä¿å­˜ä¸­é—´çŠ¶æ€
+  int audio_pkt_size; // éŸ³é¢‘åŒ…æ•°æ®å¤§å°ï¼Œé…åˆaudio_pkt ä¿å­˜ä¸­é—´çŠ¶æ€
 
-    SDL_mutex *video_decoder_mutex;			// ÊÓÆµÊı¾İ°ü¶ÓÁĞÍ¬²½²Ù×÷¶ø¶¨ÒåµÄ»¥³âÁ¿Ö¸Õë
-    SDL_mutex *audio_decoder_mutex;			// ÒôÆµÊı¾İ°ü¶ÓÁĞÍ¬²½²Ù×÷¶ø¶¨ÒåµÄ»¥³âÁ¿Ö¸Õë
+  SDL_mutex *video_decoder_mutex; // è§†é¢‘æ•°æ®åŒ…é˜Ÿåˆ—åŒæ­¥æ“ä½œè€Œå®šä¹‰çš„äº’æ–¥é‡æŒ‡é’ˆ
+  SDL_mutex *audio_decoder_mutex; // éŸ³é¢‘æ•°æ®åŒ…é˜Ÿåˆ—åŒæ­¥æ“ä½œè€Œå®šä¹‰çš„äº’æ–¥é‡æŒ‡é’ˆ
 
-    char filename[240];					// Ã½ÌåÎÄ¼şÃû
+  char filename[240]; // åª’ä½“æ–‡ä»¶å
 
 } VideoState;
 
@@ -86,717 +86,664 @@ static AVInputFormat *file_iformat;
 static const char *input_filename;
 static VideoState *cur_stream;
 
-// SDL ¿âĞèÒªµÄÏÔÊ¾±íÃæ¡£
+// SDL åº“éœ€è¦çš„æ˜¾ç¤ºè¡¨é¢ã€‚
 static SDL_Surface *screen;
 
-// È¡µÃµ±Ç°Ê±¼ä£¬ÒÔ1/1000000 ÃëÎªµ¥Î»£¬Îª±ãÓÚÔÚ¸÷¸öÆ½Ì¨ÉÏÒÆÖ²£¬ÓÉºê¿ª¹Ø¿ØÖÆ±àÒëµÄ´úÂë¡£
-int64_t av_gettime(void)
-{
+// å–å¾—å½“å‰æ—¶é—´ï¼Œä»¥1/1000000
+// ç§’ä¸ºå•ä½ï¼Œä¸ºä¾¿äºåœ¨å„ä¸ªå¹³å°ä¸Šç§»æ¤ï¼Œç”±å®å¼€å…³æ§åˆ¶ç¼–è¯‘çš„ä»£ç ã€‚
+int64_t av_gettime(void) {
 #if defined(CONFIG_WINCE)
-    return timeGetTime() *int64_t_C(1000);
+  return timeGetTime() * int64_t_C(1000);
 #elif defined(CONFIG_WIN32)
-    struct _timeb tb;
-    _ftime(&tb);
-    return ((int64_t)tb.time *int64_t_C(1000) + (int64_t)tb.millitm) *int64_t_C(1000);
+  struct _timeb tb;
+  _ftime(&tb);
+  return ((int64_t)tb.time * int64_t_C(1000) + (int64_t)tb.millitm) *
+         int64_t_C(1000);
 #else
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (int64_t)tv.tv_sec * 1000000 + tv.tv_usec;
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return (int64_t)tv.tv_sec * 1000000 + tv.tv_usec;
 #endif
 }
-// ³õÊ¼»¯¶ÓÁĞ£¬³õÊ¼»¯Îª0 ºóÔÙ´´½¨Ïß³ÌÍ¬²½Ê¹ÓÃµÄ»¥³âºÍÌõ¼ş¡£
+// åˆå§‹åŒ–é˜Ÿåˆ—ï¼Œåˆå§‹åŒ–ä¸º0 åå†åˆ›å»ºçº¿ç¨‹åŒæ­¥ä½¿ç”¨çš„äº’æ–¥å’Œæ¡ä»¶ã€‚
 static void packet_queue_init(PacketQueue *q) // packet queue handling
 {
-    memset(q, 0, sizeof(PacketQueue));
-    q->mutex = SDL_CreateMutex();
-    q->cond = SDL_CreateCond();
+  memset(q, 0, sizeof(PacketQueue));
+  q->mutex = SDL_CreateMutex();
+  q->cond = SDL_CreateCond();
 }
 
-// Ë¢ĞÂ¶ÓÁĞ£¬ÊÍ·Åµô¶ÓÁĞÖĞËùÓĞ¶¯Ì¬·ÖÅäµÄÄÚ´æ£¬°üÀ¨ÒôÊÓÆµÂãÊı¾İÕ¼ÓÃµÄÄÚ´æºÍAVPacketList ½á¹¹Õ¼ÓÃµÄÄÚ´æ
-static void packet_queue_flush(PacketQueue *q)
-{
-    AVPacketList *pkt, *pkt1;
+// åˆ·æ–°é˜Ÿåˆ—ï¼Œé‡Šæ”¾æ‰é˜Ÿåˆ—ä¸­æ‰€æœ‰åŠ¨æ€åˆ†é…çš„å†…å­˜ï¼ŒåŒ…æ‹¬éŸ³è§†é¢‘è£¸æ•°æ®å ç”¨çš„å†…å­˜å’ŒAVPacketList
+// ç»“æ„å ç”¨çš„å†…å­˜
+static void packet_queue_flush(PacketQueue *q) {
+  AVPacketList *pkt, *pkt1;
 
-    // ÓÉÓÚÊÇ¶àÏß³Ì³ÌĞò£¬ĞèÒªÍ¬²½£¬ËùÒÔÔÚ±éÀú¶ÓÁĞÊÍ·ÅËùÓĞ¶¯Ì¬·ÖÅäÄÚ´æÇ°£¬¼ÓËø¡£
-    SDL_LockMutex(q->mutex);
-    for (pkt = q->first_pkt; pkt != NULL; pkt = pkt1)
-    {
-	pkt1 = pkt->next;
-	av_free_packet(&pkt->pkt);		// ÊÍ·ÅÒôÊÓÆµÊı¾İÄÚ´æ
-	av_freep(&pkt);				// ÊÍ·ÅAVPacketList ½á¹¹
-    }
-    q->last_pkt = NULL;
-    q->first_pkt = NULL;
-    q->size = 0;
-    SDL_UnlockMutex(q->mutex);
+  // ç”±äºæ˜¯å¤šçº¿ç¨‹ç¨‹åºï¼Œéœ€è¦åŒæ­¥ï¼Œæ‰€ä»¥åœ¨éå†é˜Ÿåˆ—é‡Šæ”¾æ‰€æœ‰åŠ¨æ€åˆ†é…å†…å­˜å‰ï¼ŒåŠ é”ã€‚
+  SDL_LockMutex(q->mutex);
+  for (pkt = q->first_pkt; pkt != NULL; pkt = pkt1) {
+    pkt1 = pkt->next;
+    av_free_packet(&pkt->pkt); // é‡Šæ”¾éŸ³è§†é¢‘æ•°æ®å†…å­˜
+    av_freep(&pkt);            // é‡Šæ”¾AVPacketList ç»“æ„
+  }
+  q->last_pkt = NULL;
+  q->first_pkt = NULL;
+  q->size = 0;
+  SDL_UnlockMutex(q->mutex);
 }
 
-// ÊÍ·Å¶ÓÁĞÕ¼ÓÃËùÓĞ×ÊÔ´£¬Ê×ÏÈÊÍ·ÅµôËùÓĞ¶¯Ì¬·ÖÅäµÄÄÚ´æ£¬½Ó×ÅÊÍ·ÅÉêÇëµÄ»¥³âÁ¿ºÍÌõ¼şÁ¿¡£
-static void packet_queue_end(PacketQueue *q)
-{
-    packet_queue_flush(q);
-    SDL_DestroyMutex(q->mutex);
-    SDL_DestroyCond(q->cond);
+// é‡Šæ”¾é˜Ÿåˆ—å ç”¨æ‰€æœ‰èµ„æºï¼Œé¦–å…ˆé‡Šæ”¾æ‰æ‰€æœ‰åŠ¨æ€åˆ†é…çš„å†…å­˜ï¼Œæ¥ç€é‡Šæ”¾ç”³è¯·çš„äº’æ–¥é‡å’Œæ¡ä»¶é‡ã€‚
+static void packet_queue_end(PacketQueue *q) {
+  packet_queue_flush(q);
+  SDL_DestroyMutex(q->mutex);
+  SDL_DestroyCond(q->cond);
 }
 
-// ÍùÒôÊÓÆµ¶ÓÁĞÖĞ¹Ò½ÓÒôÊÓÆµÊı¾İÖ¡/Êı¾İ°ü¡£
-static int packet_queue_put(PacketQueue *q, AVPacket *pkt)
-{
-    AVPacketList *pkt1;
+// å¾€éŸ³è§†é¢‘é˜Ÿåˆ—ä¸­æŒ‚æ¥éŸ³è§†é¢‘æ•°æ®å¸§/æ•°æ®åŒ…ã€‚
+static int packet_queue_put(PacketQueue *q, AVPacket *pkt) {
+  AVPacketList *pkt1;
 
-    // ÏÈ·ÖÅäÒ»¸öAVPacketList ½á¹¹ÄÚ´æ
-    pkt1 = av_malloc(sizeof(AVPacketList));
-    if (!pkt1)
-	return  -1;
-    pkt1->pkt = *pkt;
-    pkt1->next = NULL;
+  // å…ˆåˆ†é…ä¸€ä¸ªAVPacketList ç»“æ„å†…å­˜
+  pkt1 = av_malloc(sizeof(AVPacketList));
+  if (!pkt1)
+    return -1;
+  pkt1->pkt = *pkt;
+  pkt1->next = NULL;
 
-    SDL_LockMutex(q->mutex);
+  SDL_LockMutex(q->mutex);
 
-    if (!q->last_pkt)
-	q->first_pkt = pkt1;
-    else
-	q->last_pkt->next = pkt1;
-    // Ìí¼Óµ½¶ÓÁĞÄ©Î²
-    q->last_pkt = pkt1;
-    // Í³¼Æ»º´æµÄÃ½ÌåÊı¾İ´óĞ¡
-    q->size += pkt1->pkt.size;
+  if (!q->last_pkt)
+    q->first_pkt = pkt1;
+  else
+    q->last_pkt->next = pkt1;
+  // æ·»åŠ åˆ°é˜Ÿåˆ—æœ«å°¾
+  q->last_pkt = pkt1;
+  // ç»Ÿè®¡ç¼“å­˜çš„åª’ä½“æ•°æ®å¤§å°
+  q->size += pkt1->pkt.size;
 
-    // ÉèÖÃÌõ¼şÁ¿ÎªÓĞĞÅºÅ×´Ì¬£¬Èç¹û½âÂëÏß³ÌÒòµÈ´ı¶øË¯Ãß¾Í¼°Ê±»½ĞÑ¡£
-    SDL_CondSignal(q->cond);
+  // è®¾ç½®æ¡ä»¶é‡ä¸ºæœ‰ä¿¡å·çŠ¶æ€ï¼Œå¦‚æœè§£ç çº¿ç¨‹å› ç­‰å¾…è€Œç¡çœ å°±åŠæ—¶å”¤é†’ã€‚
+  SDL_CondSignal(q->cond);
 
-    SDL_UnlockMutex(q->mutex);
-    return 0;
+  SDL_UnlockMutex(q->mutex);
+  return 0;
 }
 
-// ÉèÖÃÒì³£ÇëÇóÍË³ö×´Ì¬¡£
-static void packet_queue_abort(PacketQueue *q)
-{
-    SDL_LockMutex(q->mutex);
+// è®¾ç½®å¼‚å¸¸è¯·æ±‚é€€å‡ºçŠ¶æ€ã€‚
+static void packet_queue_abort(PacketQueue *q) {
+  SDL_LockMutex(q->mutex);
 
-    q->abort_request = 1;	// ÇëÇóÒì³£ÍË³ö
+  q->abort_request = 1; // è¯·æ±‚å¼‚å¸¸é€€å‡º
 
-    SDL_CondSignal(q->cond);
+  SDL_CondSignal(q->cond);
 
-    SDL_UnlockMutex(q->mutex);
+  SDL_UnlockMutex(q->mutex);
 }
 
-// ´Ó¶ÓÁĞÖĞÈ¡³öÒ»Ö¡/°üÊı¾İ¡£
+// ä»é˜Ÿåˆ—ä¸­å–å‡ºä¸€å¸§/åŒ…æ•°æ®ã€‚
 /* return < 0 if aborted, 0 if no packet and > 0 if packet.  */
-static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block)
-{
-    AVPacketList *pkt1;
-    int ret;
+static int packet_queue_get(PacketQueue *q, AVPacket *pkt, int block) {
+  AVPacketList *pkt1;
+  int ret;
 
-    SDL_LockMutex(q->mutex);
+  SDL_LockMutex(q->mutex);
 
-    for (;;)
-    {
-	// Èç¹ûÒì³£ÇëÇóÍË³ö±ê¼ÇÖÃÎ»£¬¾Í´ø´íÎóÂë·µ»Ø¡£
-	if (q->abort_request)
-	{
-	    ret = -1; // Òì³£
-	    break;
-	}
-
-	pkt1 = q->first_pkt;
-	if (pkt1)
-	{
-	    // Èç¹û¶ÓÁĞÖĞÓĞÊı¾İ£¬¾ÍÈ¡µÚÒ»¸öÊı¾İ°ü
-	    q->first_pkt = pkt1->next;
-	    if (!q->first_pkt)
-		q->last_pkt = NULL;
-	    // ĞŞÕı»º´æµÄÃ½Ìå´óĞ¡
-	    q->size -= pkt1->pkt.size;
-	    *pkt = pkt1->pkt;
-	    // ÊÍ·ÅµôAVPacketList ½á¹¹
-	    av_free(pkt1);
-	    ret = 1;
-	    break;
-	}
-	else if (!block)// ×èÈû±ê¼Ç£¬1(×èÈûÄ£Ê½)£¬0(·Ç×èÈûÄ£Ê½)
-	{
-	    ret = 0;	// ·Ç×èÈûÄ£Ê½£¬Ã»¶«Î÷Ö±½Ó·µ»Ø0
-	    break;
-	}
-	else
-	{
-	    // Èç¹ûÊÇ×èÈûÄ£Ê½£¬Ã»Êı¾İ¾Í½øÈëË¯Ãß×´Ì¬µÈ´ı
-	    SDL_CondWait(q->cond, q->mutex);
-	}
+  for (;;) {
+    // å¦‚æœå¼‚å¸¸è¯·æ±‚é€€å‡ºæ ‡è®°ç½®ä½ï¼Œå°±å¸¦é”™è¯¯ç è¿”å›ã€‚
+    if (q->abort_request) {
+      ret = -1; // å¼‚å¸¸
+      break;
     }
-    SDL_UnlockMutex(q->mutex);
-    return ret;
-}
 
-// ·ÖÅäSDL ¿âĞèÒªµÄOverlay ÏÔÊ¾±íÃæ£¬²¢ÉèÖÃ³¤¿íÊôĞÔ¡£
-static void alloc_picture(void *opaque)
-{
-    VideoState *is = opaque;
-    VideoPicture *vp;
-
-    vp = &is->pictq[0];
-
-    if (vp->bmp)
-	SDL_FreeYUVOverlay(vp->bmp);
-
-    vp->bmp = SDL_CreateYUVOverlay(is->video_st->actx->width,
-	is->video_st->actx->height,
-	SDL_YV12_OVERLAY,
-	screen);
-
-    vp->width = is->video_st->actx->width;
-    vp->height = is->video_st->actx->height;
-}
-
-static int video_display(VideoState *is, AVFrame *src_frame, double pts)
-{
-    VideoPicture *vp;
-    int dst_pix_fmt;
-    AVPicture pict;
-
-    if (is->videoq.abort_request)
-	return  -1;
-
-    vp = &is->pictq[0];
-
-    /* if the frame is not skipped, then display it */
-    if (vp->bmp)
+    pkt1 = q->first_pkt;
+    if (pkt1) {
+      // å¦‚æœé˜Ÿåˆ—ä¸­æœ‰æ•°æ®ï¼Œå°±å–ç¬¬ä¸€ä¸ªæ•°æ®åŒ…
+      q->first_pkt = pkt1->next;
+      if (!q->first_pkt)
+        q->last_pkt = NULL;
+      // ä¿®æ­£ç¼“å­˜çš„åª’ä½“å¤§å°
+      q->size -= pkt1->pkt.size;
+      *pkt = pkt1->pkt;
+      // é‡Šæ”¾æ‰AVPacketList ç»“æ„
+      av_free(pkt1);
+      ret = 1;
+      break;
+    } else if (!block) // é˜»å¡æ ‡è®°ï¼Œ1(é˜»å¡æ¨¡å¼)ï¼Œ0(éé˜»å¡æ¨¡å¼)
     {
-	SDL_Rect rect;
+      ret = 0; // éé˜»å¡æ¨¡å¼ï¼Œæ²¡ä¸œè¥¿ç›´æ¥è¿”å›0
+      break;
+    } else {
+      // å¦‚æœæ˜¯é˜»å¡æ¨¡å¼ï¼Œæ²¡æ•°æ®å°±è¿›å…¥ç¡çœ çŠ¶æ€ç­‰å¾…
+      SDL_CondWait(q->cond, q->mutex);
+    }
+  }
+  SDL_UnlockMutex(q->mutex);
+  return ret;
+}
 
-	if (pts)
-	    Sleep((int)(is->frame_last_delay * 1000));
+// åˆ†é…SDL åº“éœ€è¦çš„Overlay æ˜¾ç¤ºè¡¨é¢ï¼Œå¹¶è®¾ç½®é•¿å®½å±æ€§ã€‚
+static void alloc_picture(void *opaque) {
+  VideoState *is = opaque;
+  VideoPicture *vp;
+
+  vp = &is->pictq[0];
+
+  if (vp->bmp)
+    SDL_FreeYUVOverlay(vp->bmp);
+
+  vp->bmp = SDL_CreateYUVOverlay(is->video_st->actx->width,
+                                 is->video_st->actx->height, SDL_YV12_OVERLAY,
+                                 screen);
+
+  vp->width = is->video_st->actx->width;
+  vp->height = is->video_st->actx->height;
+}
+
+static int video_display(VideoState *is, AVFrame *src_frame, double pts) {
+  VideoPicture *vp;
+  int dst_pix_fmt;
+  AVPicture pict;
+
+  if (is->videoq.abort_request)
+    return -1;
+
+  vp = &is->pictq[0];
+
+  /* if the frame is not skipped, then display it */
+  if (vp->bmp) {
+    SDL_Rect rect;
+
+    if (pts)
+      Sleep((int)(is->frame_last_delay * 1000));
 #if 1
-	/* get a pointer on the bitmap */
-	SDL_LockYUVOverlay(vp->bmp);
+    /* get a pointer on the bitmap */
+    SDL_LockYUVOverlay(vp->bmp);
 
-	dst_pix_fmt = PIX_FMT_YUV420P;
-	pict.data[0] = vp->bmp->pixels[0];
-	pict.data[1] = vp->bmp->pixels[2];
-	pict.data[2] = vp->bmp->pixels[1];
+    dst_pix_fmt = PIX_FMT_YUV420P;
+    pict.data[0] = vp->bmp->pixels[0];
+    pict.data[1] = vp->bmp->pixels[2];
+    pict.data[2] = vp->bmp->pixels[1];
 
-	pict.linesize[0] = vp->bmp->pitches[0];
-	pict.linesize[1] = vp->bmp->pitches[2];
-	pict.linesize[2] = vp->bmp->pitches[1];
+    pict.linesize[0] = vp->bmp->pitches[0];
+    pict.linesize[1] = vp->bmp->pitches[2];
+    pict.linesize[2] = vp->bmp->pitches[1];
 
-	img_convert(&pict,
-	    dst_pix_fmt,
-	    (AVPicture*)src_frame,
-	    is->video_st->actx->pix_fmt,
-	    is->video_st->actx->width,
-	    is->video_st->actx->height);
+    img_convert(&pict, dst_pix_fmt, (AVPicture *)src_frame,
+                is->video_st->actx->pix_fmt, is->video_st->actx->width,
+                is->video_st->actx->height);
 
-	SDL_UnlockYUVOverlay(vp->bmp); /* update the bitmap content */
+    SDL_UnlockYUVOverlay(vp->bmp); /* update the bitmap content */
 
-	rect.x = 0;
-	rect.y = 0;
-	rect.w = is->video_st->actx->width;
-	rect.h = is->video_st->actx->height;
-	SDL_DisplayYUVOverlay(vp->bmp, &rect);
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = is->video_st->actx->width;
+    rect.h = is->video_st->actx->height;
+    SDL_DisplayYUVOverlay(vp->bmp, &rect);
 #endif
-    }
-    return 0;
+  }
+  return 0;
 }
-// ÊÓÆµ½âÂëÏß³Ì£¬Ö÷Òª¹¦ÄÜÊÇ·ÖÅä½âÂëÖ¡»º´æºÍSDL ÏÔÊ¾»º´æºó½øÈë½âÂëÑ­»·(´Ó¶ÓÁĞÖĞÈ¡Êı¾İÖ¡£¬½âÂë£¬¼ÆËãÊ±ÖÓ£¬ÏÔÊ¾)£¬ÊÍ·ÅÊÓÆµÊı¾İÖ¡ / Êı¾İ°ü»º´æ¡£
-static int video_thread(void *arg)
-{
-    VideoState *is = arg;
-    AVPacket pkt1, *pkt = &pkt1;
-    int len1, got_picture;
-    double pts = 0;
-    // ·ÖÅä½âÂëÖ¡»º´æ
-    AVFrame *frame = av_malloc(sizeof(AVFrame));
-    memset(frame, 0, sizeof(AVFrame));
+// è§†é¢‘è§£ç çº¿ç¨‹ï¼Œä¸»è¦åŠŸèƒ½æ˜¯åˆ†é…è§£ç å¸§ç¼“å­˜å’ŒSDL
+// æ˜¾ç¤ºç¼“å­˜åè¿›å…¥è§£ç å¾ªç¯(ä»é˜Ÿåˆ—ä¸­å–æ•°æ®å¸§ï¼Œè§£ç ï¼Œè®¡ç®—æ—¶é’Ÿï¼Œæ˜¾ç¤º)ï¼Œé‡Šæ”¾è§†é¢‘æ•°æ®å¸§
+// / æ•°æ®åŒ…ç¼“å­˜ã€‚
+static int video_thread(void *arg) {
+  VideoState *is = arg;
+  AVPacket pkt1, *pkt = &pkt1;
+  int len1, got_picture;
+  double pts = 0;
+  // åˆ†é…è§£ç å¸§ç¼“å­˜
+  AVFrame *frame = av_malloc(sizeof(AVFrame));
+  memset(frame, 0, sizeof(AVFrame));
 
-    // ·ÖÅäSDL ÏÔÊ¾»º´æ
-    alloc_picture(is);
+  // åˆ†é…SDL æ˜¾ç¤ºç¼“å­˜
+  alloc_picture(is);
 
-    for (;;)
-    {
-	// ´Ó¶ÓÁĞÖĞÈ¡Êı¾İÖ¡/Êı¾İ°ü
-	if (packet_queue_get(&is->videoq, pkt, 1) < 0)
-	    break;
+  for (;;) {
+    // ä»é˜Ÿåˆ—ä¸­å–æ•°æ®å¸§/æ•°æ®åŒ…
+    if (packet_queue_get(&is->videoq, pkt, 1) < 0)
+      break;
 
-	// ÊµÖÊĞÔ½âÂë
-	SDL_LockMutex(is->video_decoder_mutex);
-	len1 = avcodec_decode_video(is->video_st->actx, frame, &got_picture, pkt->data, pkt->size);
-	SDL_UnlockMutex(is->video_decoder_mutex);
+    // å®è´¨æ€§è§£ç 
+    SDL_LockMutex(is->video_decoder_mutex);
+    len1 = avcodec_decode_video(is->video_st->actx, frame, &got_picture,
+                                pkt->data, pkt->size);
+    SDL_UnlockMutex(is->video_decoder_mutex);
 
-	// ¼ÆËãÍ¬²½Ê±ÖÓ
-	if (pkt->dts != AV_NOPTS_VALUE)
-	    pts = av_q2d(is->video_st->time_base) *pkt->dts;
+    // è®¡ç®—åŒæ­¥æ—¶é’Ÿ
+    if (pkt->dts != AV_NOPTS_VALUE)
+      pts = av_q2d(is->video_st->time_base) * pkt->dts;
 
-	// ÅĞ¶ÏµÃµ½Í¼Ïñ£¬µ÷ÓÃÏÔÊ¾º¯ÊıÍ¬²½ÏÔÊ¾ÊÓÆµÍ¼Ïñ¡£
-	if (got_picture)
-	{
-	    if (video_display(is, frame, pts) < 0)
-		goto the_end;
-	}
-	// ÊÍ·ÅÊÓÆµÊı¾İÖ¡/Êı¾İ°üÄÚ´æ£¬´ËÊı¾İ°üÄÚ´æÊÇÔÚav_get_packet()º¯ÊıÖĞµ÷ÓÃav_malloc()·ÖÅäµÄ¡£
-	av_free_packet(pkt);
+    // åˆ¤æ–­å¾—åˆ°å›¾åƒï¼Œè°ƒç”¨æ˜¾ç¤ºå‡½æ•°åŒæ­¥æ˜¾ç¤ºè§†é¢‘å›¾åƒã€‚
+    if (got_picture) {
+      if (video_display(is, frame, pts) < 0)
+        goto the_end;
     }
+    // é‡Šæ”¾è§†é¢‘æ•°æ®å¸§/æ•°æ®åŒ…å†…å­˜ï¼Œæ­¤æ•°æ®åŒ…å†…å­˜æ˜¯åœ¨av_get_packet()å‡½æ•°ä¸­è°ƒç”¨av_malloc()åˆ†é…çš„ã€‚
+    av_free_packet(pkt);
+  }
 
 the_end:
-    av_free(frame);
-    return 0;
+  av_free(frame);
+  return 0;
 }
-// ½âÂëÒ»¸öÒôÆµÖ¡£¬·µ»Ø½âÑ¹µÄÊı¾İ´óĞ¡¡£ÌØ±ğ×¢ÒâÒ»¸öÒôÆµ°ü¿ÉÄÜ°üº¬¶à¸öÒôÆµÖ¡£¬µ«Ò»´ÎÖ»½âÂëÒ»¸öÒôÆµÖ¡£¬ËùÒÔÒ»°ü¿ÉÄÜÒª¶à´Î²ÅÄÜ½âÂëÍê¡£
-// ³ÌĞòÊ×ÏÈÓÃwhile Óï¾äÅĞ¶Ï°üÊı¾İÊÇ·ñÈ«²¿½âÍê£¬Èç¹ûÃ»ÓĞ¾Í½âÂëµ±Ç°°üÖĞµÄÖ¡£¬ĞŞ¸Ä×´Ì¬²ÎÊı£»·ñÔò£¬ÊÍ·ÅÊı¾İ°ü£¬ÔÙ´Ó¶ÓÁĞÖĞÈ¡£¬¼ÇÂ¼³õÊ¼Öµ£¬ÔÙ½øÑ­»·¡£
+// è§£ç ä¸€ä¸ªéŸ³é¢‘å¸§ï¼Œè¿”å›è§£å‹çš„æ•°æ®å¤§å°ã€‚ç‰¹åˆ«æ³¨æ„ä¸€ä¸ªéŸ³é¢‘åŒ…å¯èƒ½åŒ…å«å¤šä¸ªéŸ³é¢‘å¸§ï¼Œä½†ä¸€æ¬¡åªè§£ç ä¸€ä¸ªéŸ³é¢‘å¸§ï¼Œæ‰€ä»¥ä¸€åŒ…å¯èƒ½è¦å¤šæ¬¡æ‰èƒ½è§£ç å®Œã€‚
+// ç¨‹åºé¦–å…ˆç”¨while
+// è¯­å¥åˆ¤æ–­åŒ…æ•°æ®æ˜¯å¦å…¨éƒ¨è§£å®Œï¼Œå¦‚æœæ²¡æœ‰å°±è§£ç å½“å‰åŒ…ä¸­çš„å¸§ï¼Œä¿®æ”¹çŠ¶æ€å‚æ•°ï¼›å¦åˆ™ï¼Œé‡Šæ”¾æ•°æ®åŒ…ï¼Œå†ä»é˜Ÿåˆ—ä¸­å–ï¼Œè®°å½•åˆå§‹å€¼ï¼Œå†è¿›å¾ªç¯ã€‚
 /* decode one audio frame and returns its uncompressed size */
-static int audio_decode_frame(VideoState *is, uint8_t *audio_buf, double *pts_ptr)
-{
-    AVPacket *pkt = &is->audio_pkt;
-    int len1, data_size;
+static int audio_decode_frame(VideoState *is, uint8_t *audio_buf,
+                              double *pts_ptr) {
+  AVPacket *pkt = &is->audio_pkt;
+  int len1, data_size;
 
-    for (;;)
-    {
-	/* NOTE: the audio packet can contain several frames */
-	// Ò»¸öÒôÆµ°ü¿ÉÄÜ°üº¬¶à¸öÒôÆµÖ¡£¬¿ÉÄÜĞè¶à´Î½âÂë£¬VideoState ÓÃÒ»¸öAVPacket ĞÍ±äÁ¿±£´æ¶à´Î½âÂëµÄÖĞ¼ä×´Ì¬¡£
-	// Èç¹û¶à´Î½âÂëµ«²»ÊÇ×îºó´Î½âÂë£¬audio_decode_frame Ö±½Ó½øwhile Ñ­»·¡£
-	while (is->audio_pkt_size > 0)
-	{
-	    // µ÷ÓÃ½âÂëº¯Êı½âÂë£¬avcodec_decode_audio()º¯Êı·µ»Ø½âÂëÓÃµôµÄ×Ö½ÚÊı¡£
-	    SDL_LockMutex(is->audio_decoder_mutex);
-	    len1 = avcodec_decode_audio(is->audio_st->actx, (int16_t*)audio_buf,
-		&data_size, is->audio_pkt_data, is->audio_pkt_size);
+  for (;;) {
+    /* NOTE: the audio packet can contain several frames */
+    // ä¸€ä¸ªéŸ³é¢‘åŒ…å¯èƒ½åŒ…å«å¤šä¸ªéŸ³é¢‘å¸§ï¼Œå¯èƒ½éœ€å¤šæ¬¡è§£ç ï¼ŒVideoState ç”¨ä¸€ä¸ªAVPacket
+    // å‹å˜é‡ä¿å­˜å¤šæ¬¡è§£ç çš„ä¸­é—´çŠ¶æ€ã€‚
+    // å¦‚æœå¤šæ¬¡è§£ç ä½†ä¸æ˜¯æœ€åæ¬¡è§£ç ï¼Œaudio_decode_frame ç›´æ¥è¿›while å¾ªç¯ã€‚
+    while (is->audio_pkt_size > 0) {
+      // è°ƒç”¨è§£ç å‡½æ•°è§£ç ï¼Œavcodec_decode_audio()å‡½æ•°è¿”å›è§£ç ç”¨æ‰çš„å­—èŠ‚æ•°ã€‚
+      SDL_LockMutex(is->audio_decoder_mutex);
+      len1 = avcodec_decode_audio(is->audio_st->actx, (int16_t *)audio_buf,
+                                  &data_size, is->audio_pkt_data,
+                                  is->audio_pkt_size);
 
-	    SDL_UnlockMutex(is->audio_decoder_mutex);
-	    if (len1 < 0)
-	    {
-		/* if error, we skip the frame */
-		// Èç¹û·¢Éú´íÎó£¬Ìø¹ıµ±Ç°Ö¡£¬Ìø³öµ×²ãÑ­»·¡£
-		is->audio_pkt_size = 0;
-		break;
-	    }
-	    // ĞŞÕı½âÂëºóµÄÒôÆµÖ¡»º´æÊ×µØÖ·ºÍ´óĞ¡¡£
-	    is->audio_pkt_data += len1;
-	    is->audio_pkt_size -= len1;
-	    if (data_size <= 0) {
-		// Èç¹ûÃ»ÓĞµÃµ½½âÂëºóµÄÊı¾İ£¬¼ÌĞø½âÂë¡£
-		// ¿ÉÄÜÓĞĞ©Ö¡µÚÒ»´Î½âÂëÊ±Ö»½âÒ»¸öÖ¡Í·¾Í·µ»Ø£¬´ËÊ±ĞèÒª¼ÌĞø½âÂëÊı¾İÖ¡¡£
-		continue;
-	    }
-	    // ·µ»Ø½âÂëºóµÄÊı¾İ´óĞ¡¡£
-	    return data_size;
-	}
-
-	// ³ÌĞòµ½ÕâÀï£¬¿ÉÄÜÊÇ³õÊ¼Ê±audio_pkt Ã»ÓĞ¸³Öµ£»»òÕßÒ»°üÒÑ¾­½âÂëÍê£¬´ËÊ±ĞèÒªÊÍ·Å°üÊı¾İÄÚ´æ¡£
-	/* free the current packet */
-	if (pkt->data)
-	    av_free_packet(pkt);
-
-	// ¶ÁÈ¡ÏÂÒ»¸öÊı¾İ°ü¡£
-	/* read next packet */
-	if (packet_queue_get(&is->audioq, pkt, 1) < 0)
-	    return  -1;
-
-	// ³õÊ¼»¯Êı¾İ°üÊ×µØÖ·ºÍ´óĞ¡£¬ÓÃÓÚÒ»°üÖĞ°üº¬¶à¸öÒôÆµÖ¡Ğè¶à´Î½âÂëµÄÇé¿ö¡£
-	is->audio_pkt_data = pkt->data;
-	is->audio_pkt_size = pkt->size;
+      SDL_UnlockMutex(is->audio_decoder_mutex);
+      if (len1 < 0) {
+        /* if error, we skip the frame */
+        // å¦‚æœå‘ç”Ÿé”™è¯¯ï¼Œè·³è¿‡å½“å‰å¸§ï¼Œè·³å‡ºåº•å±‚å¾ªç¯ã€‚
+        is->audio_pkt_size = 0;
+        break;
+      }
+      // ä¿®æ­£è§£ç åçš„éŸ³é¢‘å¸§ç¼“å­˜é¦–åœ°å€å’Œå¤§å°ã€‚
+      is->audio_pkt_data += len1;
+      is->audio_pkt_size -= len1;
+      if (data_size <= 0) {
+        // å¦‚æœæ²¡æœ‰å¾—åˆ°è§£ç åçš„æ•°æ®ï¼Œç»§ç»­è§£ç ã€‚
+        // å¯èƒ½æœ‰äº›å¸§ç¬¬ä¸€æ¬¡è§£ç æ—¶åªè§£ä¸€ä¸ªå¸§å¤´å°±è¿”å›ï¼Œæ­¤æ—¶éœ€è¦ç»§ç»­è§£ç æ•°æ®å¸§ã€‚
+        continue;
+      }
+      // è¿”å›è§£ç åçš„æ•°æ®å¤§å°ã€‚
+      return data_size;
     }
+
+    // ç¨‹åºåˆ°è¿™é‡Œï¼Œå¯èƒ½æ˜¯åˆå§‹æ—¶audio_pkt
+    // æ²¡æœ‰èµ‹å€¼ï¼›æˆ–è€…ä¸€åŒ…å·²ç»è§£ç å®Œï¼Œæ­¤æ—¶éœ€è¦é‡Šæ”¾åŒ…æ•°æ®å†…å­˜ã€‚
+    /* free the current packet */
+    if (pkt->data)
+      av_free_packet(pkt);
+
+    // è¯»å–ä¸‹ä¸€ä¸ªæ•°æ®åŒ…ã€‚
+    /* read next packet */
+    if (packet_queue_get(&is->audioq, pkt, 1) < 0)
+      return -1;
+
+    // åˆå§‹åŒ–æ•°æ®åŒ…é¦–åœ°å€å’Œå¤§å°ï¼Œç”¨äºä¸€åŒ…ä¸­åŒ…å«å¤šä¸ªéŸ³é¢‘å¸§éœ€å¤šæ¬¡è§£ç çš„æƒ…å†µã€‚
+    is->audio_pkt_data = pkt->data;
+    is->audio_pkt_size = pkt->size;
+  }
 }
-// ÒôÆµÊä³ö»Øµ÷º¯Êı£¬Ã¿´ÎÒôÆµÊä³ö»º´æÎª¿ÕÊ±£¬ÏµÍ³¾Íµ÷ÓÃ´Ëº¯ÊıÌî³äÒôÆµÊä³ö»º´æ¡£
-// Ä¿Ç°²ÉÓÃ±È½Ï¼òµ¥µÄÍ¬²½·½Ê½£¬ÒôÆµ°´ÕÕ×Ô¼ºµÄ½ÚÅÄÍùÇ°×ß¼´¿É£¬²»ĞèÒªsynchronize_audio()º¯ÊıÍ¬²½´¦Àí¡£
+// éŸ³é¢‘è¾“å‡ºå›è°ƒå‡½æ•°ï¼Œæ¯æ¬¡éŸ³é¢‘è¾“å‡ºç¼“å­˜ä¸ºç©ºæ—¶ï¼Œç³»ç»Ÿå°±è°ƒç”¨æ­¤å‡½æ•°å¡«å……éŸ³é¢‘è¾“å‡ºç¼“å­˜ã€‚
+// ç›®å‰é‡‡ç”¨æ¯”è¾ƒç®€å•çš„åŒæ­¥æ–¹å¼ï¼ŒéŸ³é¢‘æŒ‰ç…§è‡ªå·±çš„èŠ‚æ‹å¾€å‰èµ°å³å¯ï¼Œä¸éœ€è¦synchronize_audio()å‡½æ•°åŒæ­¥å¤„ç†ã€‚
 /* prepare a new audio buffer */
-void sdl_audio_callback(void *opaque, Uint8 *stream, int len)
-{
-    VideoState *is = opaque;
-    int audio_size, len1;
-    double pts = 0;
+void sdl_audio_callback(void *opaque, Uint8 *stream, int len) {
+  VideoState *is = opaque;
+  int audio_size, len1;
+  double pts = 0;
 
-    while (len > 0)
-    {
-	if (is->audio_buf_index >= is->audio_buf_size)
-	{
-	    // Èç¹û½âÂëºóµÄÊı¾İÒÑÈ«²¿Êä³ö£¬¾Í½øĞĞÒôÆµ½âÂë
-	    audio_size = audio_decode_frame(is, is->audio_buf, &pts);
-	    if (audio_size < 0)
-	    {
-		/* if error, just output silence */
-		is->audio_buf_size = 1024;
-		memset(is->audio_buf, 0, is->audio_buf_size);
-	    }
-	    else
-	    {
-		//              audio_size = synchronize_audio(is, (int16_t*)is->audio_buf, audio_size, pts);
-		is->audio_buf_size = audio_size;
-	    }
-	    is->audio_buf_index = 0;
-	}
-	// ¿½±´ÊÊµ±µÄÊı¾İµ½Êä³ö»º´æ£¬²¢ĞŞ¸Ä½âÂë»º´æµÄ²ÎÊı£¬½øÏÂÒ»ÂÖÑ­»·¡£
-	// ÌØ±ğ×¢Òâ£ºÓÉ½øÏÂÒ»ÂÖÑ­»·¿ÉÖª£¬³ÌĞòÓ¦ÌîÂúSDL ¿â¸ø³öµÄÊä³ö»º´æ¡£
-	len1 = is->audio_buf_size - is->audio_buf_index;
-	if (len1 > len)
-	    len1 = len;
-	memcpy(stream, (uint8_t*)is->audio_buf + is->audio_buf_index, len1);
-	len -= len1;
-	stream += len1;
-	is->audio_buf_index += len1;
+  while (len > 0) {
+    if (is->audio_buf_index >= is->audio_buf_size) {
+      // å¦‚æœè§£ç åçš„æ•°æ®å·²å…¨éƒ¨è¾“å‡ºï¼Œå°±è¿›è¡ŒéŸ³é¢‘è§£ç 
+      audio_size = audio_decode_frame(is, is->audio_buf, &pts);
+      if (audio_size < 0) {
+        /* if error, just output silence */
+        is->audio_buf_size = 1024;
+        memset(is->audio_buf, 0, is->audio_buf_size);
+      } else {
+        //              audio_size = synchronize_audio(is,
+        //              (int16_t*)is->audio_buf, audio_size, pts);
+        is->audio_buf_size = audio_size;
+      }
+      is->audio_buf_index = 0;
     }
+    // æ‹·è´é€‚å½“çš„æ•°æ®åˆ°è¾“å‡ºç¼“å­˜ï¼Œå¹¶ä¿®æ”¹è§£ç ç¼“å­˜çš„å‚æ•°ï¼Œè¿›ä¸‹ä¸€è½®å¾ªç¯ã€‚
+    // ç‰¹åˆ«æ³¨æ„ï¼šç”±è¿›ä¸‹ä¸€è½®å¾ªç¯å¯çŸ¥ï¼Œç¨‹åºåº”å¡«æ»¡SDL åº“ç»™å‡ºçš„è¾“å‡ºç¼“å­˜ã€‚
+    len1 = is->audio_buf_size - is->audio_buf_index;
+    if (len1 > len)
+      len1 = len;
+    memcpy(stream, (uint8_t *)is->audio_buf + is->audio_buf_index, len1);
+    len -= len1;
+    stream += len1;
+    is->audio_buf_index += len1;
+  }
 }
 
-// ´ò¿ªÁ÷Ä£¿é£¬ºËĞÄ¹¦ÄÜÊÇ´ò¿ªÏàÓ¦codec£¬Æô¶¯½âÂëÏß³Ì(ÎÒÃÇ°ÑÒôÆµ»Øµ÷º¯Êı¿´×öÒ»¸ö¹ãÒåµÄÏß³Ì)¡£
+// æ‰“å¼€æµæ¨¡å—ï¼Œæ ¸å¿ƒåŠŸèƒ½æ˜¯æ‰“å¼€ç›¸åº”codecï¼Œå¯åŠ¨è§£ç çº¿ç¨‹(æˆ‘ä»¬æŠŠéŸ³é¢‘å›è°ƒå‡½æ•°çœ‹åšä¸€ä¸ªå¹¿ä¹‰çš„çº¿ç¨‹)ã€‚
 /* open a given stream. Return 0 if OK */
-static int stream_component_open(VideoState *is, int stream_index)
-{
-    AVFormatContext *ic = is->ic;
-    AVCodecContext *enc;
-    AVCodec *codec;
-    SDL_AudioSpec wanted_spec, spec;
+static int stream_component_open(VideoState *is, int stream_index) {
+  AVFormatContext *ic = is->ic;
+  AVCodecContext *enc;
+  AVCodec *codec;
+  SDL_AudioSpec wanted_spec, spec;
 
-    if (stream_index < 0 || stream_index >= ic->nb_streams)
-	return  -1;
-    // ÕÒµ½´ÓÎÄ¼ş¸ñÊ½·ÖÎöÖĞµÃµ½µÄ½âÂëÆ÷ÉÏÏÂÎÄÖ¸Õë£¬±ãÓÚÒıÓÃÆäÖĞµÄ²ÎÊı¡£
-    enc = ic->streams[stream_index]->actx;
+  if (stream_index < 0 || stream_index >= ic->nb_streams)
+    return -1;
+  // æ‰¾åˆ°ä»æ–‡ä»¶æ ¼å¼åˆ†æä¸­å¾—åˆ°çš„è§£ç å™¨ä¸Šä¸‹æ–‡æŒ‡é’ˆï¼Œä¾¿äºå¼•ç”¨å…¶ä¸­çš„å‚æ•°ã€‚
+  enc = ic->streams[stream_index]->actx;
 
-    /* prepare audio output */
-    if (enc->codec_type == CODEC_TYPE_AUDIO)
-    {
-	// ³õÊ¼»¯ÒôÆµÊä³ö²ÎÊı£¬²¢µ÷ÓÃSDL_OpenAudio()ÉèÖÃµ½SDL ¿â¡£
-	wanted_spec.freq = enc->sample_rate;
-	wanted_spec.format = AUDIO_S16SYS;
-	/* hack for AC3. XXX: suppress that */
-	if (enc->channels > 2)
-	    enc->channels = 2;
-	wanted_spec.channels = enc->channels;
-	wanted_spec.silence = 0;
-	wanted_spec.samples = 1024; //SDL_AUDIO_BUFFER_SIZE;
-	wanted_spec.callback = sdl_audio_callback; // ÒôÆµÏß³ÌµÄ»Øµ÷º¯Êı
-	wanted_spec.userdata = is;
-	if (SDL_OpenAudio(&wanted_spec, &spec) < 0)
-	{
-	    // wanted_spec ÊÇÓ¦ÓÃ³ÌĞòÉè¶¨¸øSDL ¿âµÄÒôÆµ²ÎÊı£¬spec ÊÇSDL ¿â·µ»Ø¸øÓ¦ÓÃ³ÌĞòËüÄÜÖ§³ÖµÄÒôÆµ²ÎÊı£¬Í¨³£ÊÇÒ»ÖÂµÄ¡£
-	    // Èç¹û³¬¹ıSDL Ö§³ÖµÄ²ÎÊı·¶Î§£¬»á·µ»Ø×îÏà½üµÄ²ÎÊı¡£
-	    fprintf(stderr, "SDL_OpenAudio: %s\n", SDL_GetError());
-	    return  -1;
-	}
+  /* prepare audio output */
+  if (enc->codec_type == CODEC_TYPE_AUDIO) {
+    // åˆå§‹åŒ–éŸ³é¢‘è¾“å‡ºå‚æ•°ï¼Œå¹¶è°ƒç”¨SDL_OpenAudio()è®¾ç½®åˆ°SDL åº“ã€‚
+    wanted_spec.freq = enc->sample_rate;
+    wanted_spec.format = AUDIO_S16SYS;
+    /* hack for AC3. XXX: suppress that */
+    if (enc->channels > 2)
+      enc->channels = 2;
+    wanted_spec.channels = enc->channels;
+    wanted_spec.silence = 0;
+    wanted_spec.samples = 1024;                // SDL_AUDIO_BUFFER_SIZE;
+    wanted_spec.callback = sdl_audio_callback; // éŸ³é¢‘çº¿ç¨‹çš„å›è°ƒå‡½æ•°
+    wanted_spec.userdata = is;
+    if (SDL_OpenAudio(&wanted_spec, &spec) < 0) {
+      // wanted_spec æ˜¯åº”ç”¨ç¨‹åºè®¾å®šç»™SDL åº“çš„éŸ³é¢‘å‚æ•°ï¼Œspec æ˜¯SDL
+      // åº“è¿”å›ç»™åº”ç”¨ç¨‹åºå®ƒèƒ½æ”¯æŒçš„éŸ³é¢‘å‚æ•°ï¼Œé€šå¸¸æ˜¯ä¸€è‡´çš„ã€‚ å¦‚æœè¶…è¿‡SDL
+      // æ”¯æŒçš„å‚æ•°èŒƒå›´ï¼Œä¼šè¿”å›æœ€ç›¸è¿‘çš„å‚æ•°ã€‚
+      fprintf(stderr, "SDL_OpenAudio: %s\n", SDL_GetError());
+      return -1;
     }
+  }
 
-    // ÒÀÕÕ±à½âÂëÉÏÏÂÎÄµÄcodec_id£¬±éÀú±à½âÂëÆ÷Á´±í£¬ÕÒµ½ÏàÓ¦µÄ¹¦ÄÜº¯Êı¡£
-    codec = avcodec_find_decoder(enc->codec_id);
+  // ä¾ç…§ç¼–è§£ç ä¸Šä¸‹æ–‡çš„codec_idï¼Œéå†ç¼–è§£ç å™¨é“¾è¡¨ï¼Œæ‰¾åˆ°ç›¸åº”çš„åŠŸèƒ½å‡½æ•°ã€‚
+  codec = avcodec_find_decoder(enc->codec_id);
 
-    // ºËĞÄ¹¦ÄÜÖ®Ò»,´ò¿ª±à½âÂëÆ÷£¬³õÊ¼»¯¾ßÌå±à½âÂëÆ÷µÄÔËĞĞ»·¾³¡£
-    if (!codec || avcodec_open(enc, codec) < 0)
-	return  -1;
+  // æ ¸å¿ƒåŠŸèƒ½ä¹‹ä¸€,æ‰“å¼€ç¼–è§£ç å™¨ï¼Œåˆå§‹åŒ–å…·ä½“ç¼–è§£ç å™¨çš„è¿è¡Œç¯å¢ƒã€‚
+  if (!codec || avcodec_open(enc, codec) < 0)
+    return -1;
 
-    switch (enc->codec_type)
-    {
-    case CODEC_TYPE_AUDIO:
-	// ÔÚVideoState ÖĞ¼ÇÂ¼ÒôÆµÁ÷²ÎÊı¡£
-	is->audio_stream = stream_index;
-	is->audio_st = ic->streams[stream_index];
-	is->audio_buf_size = 0;
-	is->audio_buf_index = 0;
-	// ³õÊ¼»¯ÒôÆµ¶ÓÁĞ
-	memset(&is->audio_pkt, 0, sizeof(is->audio_pkt));
-	packet_queue_init(&is->audioq);
-	SDL_PauseAudio(0);	// Æô¶¯¹ãÒåµÄÒôÆµ½âÂëÏß³Ì¡£
-	break;
-    case CODEC_TYPE_VIDEO:
-	// ÔÚVideoState ÖĞ¼ÇÂ¼ÊÓÆµÁ÷²ÎÊı¡£
-	is->video_stream = stream_index;
-	is->video_st = ic->streams[stream_index];
+  switch (enc->codec_type) {
+  case CODEC_TYPE_AUDIO:
+    // åœ¨VideoState ä¸­è®°å½•éŸ³é¢‘æµå‚æ•°ã€‚
+    is->audio_stream = stream_index;
+    is->audio_st = ic->streams[stream_index];
+    is->audio_buf_size = 0;
+    is->audio_buf_index = 0;
+    // åˆå§‹åŒ–éŸ³é¢‘é˜Ÿåˆ—
+    memset(&is->audio_pkt, 0, sizeof(is->audio_pkt));
+    packet_queue_init(&is->audioq);
+    SDL_PauseAudio(0); // å¯åŠ¨å¹¿ä¹‰çš„éŸ³é¢‘è§£ç çº¿ç¨‹ã€‚
+    break;
+  case CODEC_TYPE_VIDEO:
+    // åœ¨VideoState ä¸­è®°å½•è§†é¢‘æµå‚æ•°ã€‚
+    is->video_stream = stream_index;
+    is->video_st = ic->streams[stream_index];
 
-	is->frame_last_delay = is->video_st->frame_last_delay;
-	// ³õÊ¼»¯ÊÓÆµ¶ÓÁĞ
-	packet_queue_init(&is->videoq);
-	is->video_tid = SDL_CreateThread(video_thread, is);			// Ö±½ÓÆô¶¯ÊÓÆµ½âÂëÏß³Ì¡£
-	break;
-    default:
-	break;
-    }
-    return 0;
+    is->frame_last_delay = is->video_st->frame_last_delay;
+    // åˆå§‹åŒ–è§†é¢‘é˜Ÿåˆ—
+    packet_queue_init(&is->videoq);
+    is->video_tid =
+        SDL_CreateThread(video_thread, is); // ç›´æ¥å¯åŠ¨è§†é¢‘è§£ç çº¿ç¨‹ã€‚
+    break;
+  default:
+    break;
+  }
+  return 0;
 }
-// ¹Ø±ÕÁ÷Ä£¿é£¬Í£Ö¹½âÂëÏß³Ì£¬ÊÍ·Å¶ÓÁĞ×ÊÔ´¡£
-// Í¨¹ıpacket_queue_abort()º¯ÊıÖÃabort_request ±êÖ¾Î»£¬½âÂëÏß³ÌÅĞ±ğ´Ë±êÖ¾Î»²¢°²È«ÍË³öÏß³Ì¡£
-static void stream_component_close(VideoState *is, int stream_index)
-{
-    AVFormatContext *ic = is->ic;
-    AVCodecContext *enc;
-    // ¼òµ¥µÄÁ÷Ë÷Òı²ÎÊıĞ£Ñé¡£
-    if (stream_index < 0 || stream_index >= ic->nb_streams)
-	return;
-    // ÕÒµ½´ÓÎÄ¼ş¸ñÊ½·ÖÎöÖĞµÃµ½µÄ½âÂëÆ÷ÉÏÏÂÎÄÖ¸Õë£¬±ãÓÚÒıÓÃÆäÖĞµÄ²ÎÊı¡£
-    enc = ic->streams[stream_index]->actx;
+// å…³é—­æµæ¨¡å—ï¼Œåœæ­¢è§£ç çº¿ç¨‹ï¼Œé‡Šæ”¾é˜Ÿåˆ—èµ„æºã€‚
+// é€šè¿‡packet_queue_abort()å‡½æ•°ç½®abort_request
+// æ ‡å¿—ä½ï¼Œè§£ç çº¿ç¨‹åˆ¤åˆ«æ­¤æ ‡å¿—ä½å¹¶å®‰å…¨é€€å‡ºçº¿ç¨‹ã€‚
+static void stream_component_close(VideoState *is, int stream_index) {
+  AVFormatContext *ic = is->ic;
+  AVCodecContext *enc;
+  // ç®€å•çš„æµç´¢å¼•å‚æ•°æ ¡éªŒã€‚
+  if (stream_index < 0 || stream_index >= ic->nb_streams)
+    return;
+  // æ‰¾åˆ°ä»æ–‡ä»¶æ ¼å¼åˆ†æä¸­å¾—åˆ°çš„è§£ç å™¨ä¸Šä¸‹æ–‡æŒ‡é’ˆï¼Œä¾¿äºå¼•ç”¨å…¶ä¸­çš„å‚æ•°ã€‚
+  enc = ic->streams[stream_index]->actx;
 
-    switch (enc->codec_type)
-    {
-	// Í£Ö¹½âÂëÏß³Ì£¬ÊÍ·Å¶ÓÁĞ×ÊÔ´¡£
-    case CODEC_TYPE_AUDIO:
-	packet_queue_abort(&is->audioq);
-	SDL_CloseAudio();
-	packet_queue_end(&is->audioq);
-	break;
-    case CODEC_TYPE_VIDEO:
-	packet_queue_abort(&is->videoq);
-	SDL_WaitThread(is->video_tid, NULL);
-	packet_queue_end(&is->videoq);
-	break;
-    default:
-	break;
-    }
-    // ÊÍ·Å±à½âÂëÆ÷ÉÏÏÂÎÄ×ÊÔ´
-    avcodec_close(enc);
+  switch (enc->codec_type) {
+    // åœæ­¢è§£ç çº¿ç¨‹ï¼Œé‡Šæ”¾é˜Ÿåˆ—èµ„æºã€‚
+  case CODEC_TYPE_AUDIO:
+    packet_queue_abort(&is->audioq);
+    SDL_CloseAudio();
+    packet_queue_end(&is->audioq);
+    break;
+  case CODEC_TYPE_VIDEO:
+    packet_queue_abort(&is->videoq);
+    SDL_WaitThread(is->video_tid, NULL);
+    packet_queue_end(&is->videoq);
+    break;
+  default:
+    break;
+  }
+  // é‡Šæ”¾ç¼–è§£ç å™¨ä¸Šä¸‹æ–‡èµ„æº
+  avcodec_close(enc);
 }
-// ÎÄ¼ş½âÎöÏß³Ì£¬º¯ÊıÃûÓĞµã²»Ãû¸±ÆäÊµ¡£Íê³ÉÈı´ó¹¦ÄÜ£¬Ö±½ÓÊ¶±ğÎÄ¼ş¸ñÊ½ºÍ¼ä½ÓÊ¶±ğÃ½Ìå¸ñÊ½£¬´ò¿ª¾ßÌåµÄ±à½âÂëÆ÷²¢Æô¶¯½âÂëÏß³Ì£¬·ÖÀëÒôÊÓÆµÃ½Ìå°ü²¢¹Ò½Óµ½ÏàÓ¦¶ÓÁĞ¡£
-static int decode_thread(void *arg)
-{
-    VideoState *is = arg;
-    AVFormatContext *ic;
-    int err, i, ret, video_index, audio_index;
-    AVPacket pkt1, *pkt = &pkt1;
-    AVFormatParameters params, *ap = &params;
+// æ–‡ä»¶è§£æçº¿ç¨‹ï¼Œå‡½æ•°åæœ‰ç‚¹ä¸åå‰¯å…¶å®ã€‚å®Œæˆä¸‰å¤§åŠŸèƒ½ï¼Œç›´æ¥è¯†åˆ«æ–‡ä»¶æ ¼å¼å’Œé—´æ¥è¯†åˆ«åª’ä½“æ ¼å¼ï¼Œæ‰“å¼€å…·ä½“çš„ç¼–è§£ç å™¨å¹¶å¯åŠ¨è§£ç çº¿ç¨‹ï¼Œåˆ†ç¦»éŸ³è§†é¢‘åª’ä½“åŒ…å¹¶æŒ‚æ¥åˆ°ç›¸åº”é˜Ÿåˆ—ã€‚
+static int decode_thread(void *arg) {
+  VideoState *is = arg;
+  AVFormatContext *ic;
+  int err, i, ret, video_index, audio_index;
+  AVPacket pkt1, *pkt = &pkt1;
+  AVFormatParameters params, *ap = &params;
 
-    int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL | SDL_RESIZABLE;
+  int flags = SDL_HWSURFACE | SDL_ASYNCBLIT | SDL_HWACCEL | SDL_RESIZABLE;
 
-    // ³õÊ¼»¯»ù±¾±äÁ¿Ö¸Ê¾Ã»ÓĞÏàÓ¦µÄÁ÷¡£
-    video_index = -1;
-    audio_index = -1;
+  // åˆå§‹åŒ–åŸºæœ¬å˜é‡æŒ‡ç¤ºæ²¡æœ‰ç›¸åº”çš„æµã€‚
+  video_index = -1;
+  audio_index = -1;
 
-    is->video_stream = -1;
-    is->audio_stream = -1;
+  is->video_stream = -1;
+  is->audio_stream = -1;
 
-    memset(ap, 0, sizeof(*ap));
-    // µ÷ÓÃº¯ÊıÖ±½ÓÊ¶±ğÎÄ¼ş¸ñÊ½£¬ÔÚ´Ëº¯ÊıÖĞÔÙµ÷ÓÃÆäËûº¯Êı¼ä½ÓÊ¶±ğÃ½Ìå¸ñÊ½¡£
-    err = av_open_input_file(&ic, is->filename, NULL, 0, ap);
-    if (err < 0)
-    {
-	ret = -1;
-	goto fail;
+  memset(ap, 0, sizeof(*ap));
+  // è°ƒç”¨å‡½æ•°ç›´æ¥è¯†åˆ«æ–‡ä»¶æ ¼å¼ï¼Œåœ¨æ­¤å‡½æ•°ä¸­å†è°ƒç”¨å…¶ä»–å‡½æ•°é—´æ¥è¯†åˆ«åª’ä½“æ ¼å¼ã€‚
+  err = av_open_input_file(&ic, is->filename, NULL, 0, ap);
+  if (err < 0) {
+    ret = -1;
+    goto fail;
+  }
+  // ä¿å­˜æ–‡ä»¶æ ¼å¼ä¸Šä¸‹æ–‡ï¼Œä¾¿äºå„æ•°æ®ç»“æ„é—´è·³è½¬ã€‚
+  is->ic = ic;
+
+  for (i = 0; i < ic->nb_streams; i++) {
+    AVCodecContext *enc = ic->streams[i]->actx;
+    switch (enc->codec_type) {
+      // ä¿å­˜éŸ³è§†é¢‘æµç´¢å¼•ï¼Œå¹¶æŠŠæ˜¾ç¤ºè§†é¢‘å‚æ•°è®¾ç½®åˆ°SDL åº“ã€‚
+    case CODEC_TYPE_AUDIO:
+      if (audio_index < 0)
+        audio_index = i;
+      break;
+    case CODEC_TYPE_VIDEO:
+      if (video_index < 0)
+        video_index = i;
+
+      screen = SDL_SetVideoMode(enc->width, enc->height, 0, flags);
+
+      SDL_WM_SetCaption("FFplay", "FFplay"); // ä¿®æ”¹æ˜¯ä¸ºäº†é€‚é…è§†é¢‘å¤§å°
+
+      //          schedule_refresh(is, 40);
+      break;
+    default:
+      break;
     }
-    // ±£´æÎÄ¼ş¸ñÊ½ÉÏÏÂÎÄ£¬±ãÓÚ¸÷Êı¾İ½á¹¹¼äÌø×ª¡£
-    is->ic = ic;
+  }
+  // å¦‚æœæœ‰éŸ³é¢‘æµï¼Œå°±è°ƒç”¨å‡½æ•°æ‰“å¼€éŸ³é¢‘ç¼–è§£ç å™¨å¹¶å¯åŠ¨éŸ³é¢‘å¹¿ä¹‰è§£ç çº¿ç¨‹ã€‚
+  if (audio_index >= 0)
+    stream_component_open(is, audio_index);
+  // å¦‚æœæœ‰è§†é¢‘æµï¼Œå°±è°ƒç”¨å‡½æ•°æ‰“å¼€è§†é¢‘ç¼–è§£ç å™¨å¹¶å¯åŠ¨è§†é¢‘è§£ç çº¿ç¨‹ã€‚
+  if (video_index >= 0)
+    stream_component_open(is, video_index);
+  // å¦‚æœæ—¢æ²¡æœ‰éŸ³é¢‘æµï¼Œåˆæ²¡æœ‰è§†é¢‘æµï¼Œå°±è®¾ç½®é”™è¯¯ç è¿”å›ã€‚
+  if (is->video_stream < 0 && is->audio_stream < 0) {
+    fprintf(stderr, "%s: could not open codecs\n", is->filename);
+    ret = -1;
+    goto fail;
+  }
 
-    for (i = 0; i < ic->nb_streams; i++)
-    {
-	AVCodecContext *enc = ic->streams[i]->actx;
-	switch (enc->codec_type)
-	{
-	    // ±£´æÒôÊÓÆµÁ÷Ë÷Òı£¬²¢°ÑÏÔÊ¾ÊÓÆµ²ÎÊıÉèÖÃµ½SDL ¿â¡£
-	case CODEC_TYPE_AUDIO:
-	    if (audio_index < 0)
-		audio_index = i;
-	    break;
-	case CODEC_TYPE_VIDEO:
-	    if (video_index < 0)
-		video_index = i;
-
-	    screen = SDL_SetVideoMode(enc->width, enc->height, 0, flags);
-
-	    SDL_WM_SetCaption("FFplay", "FFplay"); // ĞŞ¸ÄÊÇÎªÁËÊÊÅäÊÓÆµ´óĞ¡
-
-//          schedule_refresh(is, 40);
-	    break;
-	default:
-	    break;
-	}
-    }
-    // Èç¹ûÓĞÒôÆµÁ÷£¬¾Íµ÷ÓÃº¯Êı´ò¿ªÒôÆµ±à½âÂëÆ÷²¢Æô¶¯ÒôÆµ¹ãÒå½âÂëÏß³Ì¡£
-    if (audio_index >= 0)
-	stream_component_open(is, audio_index);
-    // Èç¹ûÓĞÊÓÆµÁ÷£¬¾Íµ÷ÓÃº¯Êı´ò¿ªÊÓÆµ±à½âÂëÆ÷²¢Æô¶¯ÊÓÆµ½âÂëÏß³Ì¡£
-    if (video_index >= 0)
-	stream_component_open(is, video_index);
-    // Èç¹û¼ÈÃ»ÓĞÒôÆµÁ÷£¬ÓÖÃ»ÓĞÊÓÆµÁ÷£¬¾ÍÉèÖÃ´íÎóÂë·µ»Ø¡£
-    if (is->video_stream < 0 && is->audio_stream < 0)
-    {
-	fprintf(stderr, "%s: could not open codecs\n", is->filename);
-	ret = -1;
-	goto fail;
-    }
-
-    for (;;)
-    {
-	if (is->abort_request) {
-	    // Èç¹ûÒì³£ÍË³öÇëÇóÖÃÎ»£¬¾ÍÍË³öÎÄ¼ş½âÎöÏß³Ì¡£
-	    break;
-	}
-
-
-	if (is->audioq.size > MAX_AUDIOQ_SIZE || is->videoq.size > MAX_VIDEOQ_SIZE || url_feof(&ic->pb))
-	{
-	    // Èç¹û¶ÓÁĞÂú£¬¾ÍÉÔÎ¢ÑÓÊ±Ò»ÏÂ¡£
-	    SDL_Delay(10); // if the queue are full, no need to read more,wait 10 ms
-	    continue;
-	}
-	// ´ÓÃ½ÌåÎÄ¼şÖĞÍêÕûµÄ¶ÁÈ¡Ò»°üÒôÊÓÆµÊı¾İ¡£
-	ret = av_read_packet(ic, pkt); //av_read_frame(ic, pkt);		
-	if (ret < 0)
-	{
-	    if (url_ferror(&ic->pb) == 0)
-	    {
-		SDL_Delay(100); // wait for user event
-		continue;
-	    }
-	    else
-		break;
-	}
-
-	{
-	    unsigned int *p1 = (unsigned int*)(pkt->data);
-	    unsigned int *p2 = p1 + 1;
-
-	    if ((*p1 == 0x3c8638) && (*p2 == 0x1185148))
-	    {
-		int dbg = 0;
-	    }
-	}
-	// ÅĞ¶Ï°üÊı¾İµÄÀàĞÍ£¬·Ö±ğ¹Ò½Óµ½ÏàÓ¦¶ÓÁĞ£¬Èç¹ûÊÇ²»Ê¶±ğµÄÀàĞÍ£¬¾ÍÖ±½ÓÊÍ·Å¶ªÆúµô¡£
-	if (pkt->stream_index == is->audio_stream)
-	{
-	    packet_queue_put(&is->audioq, pkt);
-	}
-	else if (pkt->stream_index == is->video_stream)
-	{
-	    packet_queue_put(&is->videoq, pkt);
-	}
-	else
-	{
-	    av_free_packet(pkt);
-	}
-    }
-    // ¼òµ¥µÄÑÓÊ±£¬ÈÃºóÃæµÄÏß³ÌÓĞ»ú»á°ÑÊı¾İ½âÂëÏÔÊ¾Íê¡£µ±È»¶ªÆúµô×îºóµÄÒ»µãµãÊı¾İÒ²¿ÉÒÔ¡£
-    while (!is->abort_request)   // wait until the end
-    {
-	SDL_Delay(100);
+  for (;;) {
+    if (is->abort_request) {
+      // å¦‚æœå¼‚å¸¸é€€å‡ºè¯·æ±‚ç½®ä½ï¼Œå°±é€€å‡ºæ–‡ä»¶è§£æçº¿ç¨‹ã€‚
+      break;
     }
 
-    ret = 0;
+    if (is->audioq.size > MAX_AUDIOQ_SIZE ||
+        is->videoq.size > MAX_VIDEOQ_SIZE || url_feof(&ic->pb)) {
+      // å¦‚æœé˜Ÿåˆ—æ»¡ï¼Œå°±ç¨å¾®å»¶æ—¶ä¸€ä¸‹ã€‚
+      SDL_Delay(10); // if the queue are full, no need to read more,wait 10 ms
+      continue;
+    }
+    // ä»åª’ä½“æ–‡ä»¶ä¸­å®Œæ•´çš„è¯»å–ä¸€åŒ…éŸ³è§†é¢‘æ•°æ®ã€‚
+    ret = av_read_packet(ic, pkt); // av_read_frame(ic, pkt);
+    if (ret < 0) {
+      if (url_ferror(&ic->pb) == 0) {
+        SDL_Delay(100); // wait for user event
+        continue;
+      } else
+        break;
+    }
 
-    // ÊÍ·ÅµôÔÚ±¾Ïß³ÌÖĞ·ÖÅäµÄ¸÷ÖÖ×ÊÔ´£¬ÌåÏÖÁËË­ÉêÇëË­ÊÍ·ÅµÄ³ÌĞò×Ô·â±ÕĞÔ¡£
+    {
+      unsigned int *p1 = (unsigned int *)(pkt->data);
+      unsigned int *p2 = p1 + 1;
+
+      if ((*p1 == 0x3c8638) && (*p2 == 0x1185148)) {
+        int dbg = 0;
+      }
+    }
+    // åˆ¤æ–­åŒ…æ•°æ®çš„ç±»å‹ï¼Œåˆ†åˆ«æŒ‚æ¥åˆ°ç›¸åº”é˜Ÿåˆ—ï¼Œå¦‚æœæ˜¯ä¸è¯†åˆ«çš„ç±»å‹ï¼Œå°±ç›´æ¥é‡Šæ”¾ä¸¢å¼ƒæ‰ã€‚
+    if (pkt->stream_index == is->audio_stream) {
+      packet_queue_put(&is->audioq, pkt);
+    } else if (pkt->stream_index == is->video_stream) {
+      packet_queue_put(&is->videoq, pkt);
+    } else {
+      av_free_packet(pkt);
+    }
+  }
+  // ç®€å•çš„å»¶æ—¶ï¼Œè®©åé¢çš„çº¿ç¨‹æœ‰æœºä¼šæŠŠæ•°æ®è§£ç æ˜¾ç¤ºå®Œã€‚å½“ç„¶ä¸¢å¼ƒæ‰æœ€åçš„ä¸€ç‚¹ç‚¹æ•°æ®ä¹Ÿå¯ä»¥ã€‚
+  while (!is->abort_request) // wait until the end
+  {
+    SDL_Delay(100);
+  }
+
+  ret = 0;
+
+  // é‡Šæ”¾æ‰åœ¨æœ¬çº¿ç¨‹ä¸­åˆ†é…çš„å„ç§èµ„æºï¼Œä½“ç°äº†è°ç”³è¯·è°é‡Šæ”¾çš„ç¨‹åºè‡ªå°é—­æ€§ã€‚
 fail:
-    if (is->audio_stream >= 0)
-	stream_component_close(is, is->audio_stream);
+  if (is->audio_stream >= 0)
+    stream_component_close(is, is->audio_stream);
 
-    if (is->video_stream >= 0)
-	stream_component_close(is, is->video_stream);
+  if (is->video_stream >= 0)
+    stream_component_close(is, is->video_stream);
 
-    if (is->ic)
-    {
-	av_close_input_file(is->ic);
-	is->ic = NULL;
-    }
+  if (is->ic) {
+    av_close_input_file(is->ic);
+    is->ic = NULL;
+  }
 
-    if (ret != 0)
-    {
-	SDL_Event event;
-
-	event.type = FF_QUIT_EVENT;
-	event.user.data1 = is;
-	SDL_PushEvent(&event);
-    }
-    return 0;
-}
-
-// ´ò¿ªÁ÷¡£Ö÷Òª¹¦ÄÜÊÇ·ÖÅäÈ«¾Ö×Ü¿ØÊı¾İ½á¹¹£¬³õÊ¼»¯Ïà¹Ø²ÎÊı£¬Æô¶¯ÎÄ¼ş½âÎöÏß³Ì¡£
-static VideoState *stream_open(const char *filename, AVInputFormat *iformat)
-{
-    VideoState *is;
-
-    is = av_mallocz(sizeof(VideoState));
-    if (!is)
-	return NULL;
-    pstrcpy(is->filename, sizeof(is->filename), filename);
-
-    is->audio_decoder_mutex = SDL_CreateMutex();
-    is->video_decoder_mutex = SDL_CreateMutex();
-
-    is->parse_tid = SDL_CreateThread(decode_thread, is);
-    if (!is->parse_tid)
-    {
-	av_free(is);
-	return NULL;
-    }
-    return is;
-}
-// ¹Ø±ÕÁ÷¡£Ö÷Òª¹¦ÄÜÊÇÊÍ·Å×ÊÔ´¡£
-static void stream_close(VideoState *is)
-{
-    VideoPicture *vp;
-    int i;
-
-    is->abort_request = 1;
-    SDL_WaitThread(is->parse_tid, NULL);
-
-    for (i = 0; i < VIDEO_PICTURE_QUEUE_SIZE; i++)
-    {
-	vp = &is->pictq[i];
-	if (vp->bmp)
-	{
-	    SDL_FreeYUVOverlay(vp->bmp);
-	    vp->bmp = NULL;
-	}
-    }
-
-    SDL_DestroyMutex(is->audio_decoder_mutex);
-    SDL_DestroyMutex(is->video_decoder_mutex);
-
-    free(is);
-}
-
-// ³ÌĞòÍË³öÊ±µ÷ÓÃµÄº¯Êı£¬¹Ø±ÕÊÍ·ÅÒ»Ğ©×ÊÔ´¡£
-void do_exit(void)
-{
-    if (cur_stream)
-    {
-	stream_close(cur_stream);
-	cur_stream = NULL;
-    }
-
-    SDL_Quit();
-    exit(0);
-}
-// SDL ¿âµÄÏûÏ¢ÊÂ¼şÑ­»·¡£
-void event_loop(void) // handle an event sent by the GUI
-{
+  if (ret != 0) {
     SDL_Event event;
 
-    for (;;)
-    {
-	SDL_WaitEvent(&event);
-	switch (event.type)
-	{
-	case SDL_KEYDOWN:
-	    switch (event.key.keysym.sym)
-	    {
-	    case SDLK_ESCAPE:
-	    case SDLK_q:
-		do_exit();
-		break;
-	    default:
-		break;
-	    }
-	    break;
-	case SDL_QUIT:
-	case FF_QUIT_EVENT:
-	    do_exit();
-	    break;
-	default:
-	    break;
-	}
-    }
+    event.type = FF_QUIT_EVENT;
+    event.user.data1 = is;
+    SDL_PushEvent(&event);
+  }
+  return 0;
 }
-// Èë¿Úº¯Êı£¬³õÊ¼»¯SDL ¿â£¬×¢²áSDL ÏûÏ¢ÊÂ¼ş£¬Æô¶¯ÎÄ¼ş½âÎöÏß³Ì£¬½øÈëÏûÏ¢Ñ­»·¡£
-int main(int argc, char **argv)
+
+// æ‰“å¼€æµã€‚ä¸»è¦åŠŸèƒ½æ˜¯åˆ†é…å…¨å±€æ€»æ§æ•°æ®ç»“æ„ï¼Œåˆå§‹åŒ–ç›¸å…³å‚æ•°ï¼Œå¯åŠ¨æ–‡ä»¶è§£æçº¿ç¨‹ã€‚
+static VideoState *stream_open(const char *filename, AVInputFormat *iformat) {
+  VideoState *is;
+
+  is = av_mallocz(sizeof(VideoState));
+  if (!is)
+    return NULL;
+  pstrcpy(is->filename, sizeof(is->filename), filename);
+
+  is->audio_decoder_mutex = SDL_CreateMutex();
+  is->video_decoder_mutex = SDL_CreateMutex();
+
+  is->parse_tid = SDL_CreateThread(decode_thread, is);
+  if (!is->parse_tid) {
+    av_free(is);
+    return NULL;
+  }
+  return is;
+}
+// å…³é—­æµã€‚ä¸»è¦åŠŸèƒ½æ˜¯é‡Šæ”¾èµ„æºã€‚
+static void stream_close(VideoState *is) {
+  VideoPicture *vp;
+  int i;
+
+  is->abort_request = 1;
+  SDL_WaitThread(is->parse_tid, NULL);
+
+  for (i = 0; i < VIDEO_PICTURE_QUEUE_SIZE; i++) {
+    vp = &is->pictq[i];
+    if (vp->bmp) {
+      SDL_FreeYUVOverlay(vp->bmp);
+      vp->bmp = NULL;
+    }
+  }
+
+  SDL_DestroyMutex(is->audio_decoder_mutex);
+  SDL_DestroyMutex(is->video_decoder_mutex);
+
+  free(is);
+}
+
+// ç¨‹åºé€€å‡ºæ—¶è°ƒç”¨çš„å‡½æ•°ï¼Œå…³é—­é‡Šæ”¾ä¸€äº›èµ„æºã€‚
+void do_exit(void) {
+  if (cur_stream) {
+    stream_close(cur_stream);
+    cur_stream = NULL;
+  }
+
+  SDL_Quit();
+  exit(0);
+}
+// SDL åº“çš„æ¶ˆæ¯äº‹ä»¶å¾ªç¯ã€‚
+void event_loop(void) // handle an event sent by the GUI
 {
-    int flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;
+  SDL_Event event;
 
-    av_register_all();
+  for (;;) {
+    SDL_WaitEvent(&event);
+    switch (event.type) {
+    case SDL_KEYDOWN:
+      switch (event.key.keysym.sym) {
+      case SDLK_ESCAPE:
+      case SDLK_q:
+        do_exit();
+        break;
+      default:
+        break;
+      }
+      break;
+    case SDL_QUIT:
+    case FF_QUIT_EVENT:
+      do_exit();
+      break;
+    default:
+      break;
+    }
+  }
+}
+// å…¥å£å‡½æ•°ï¼Œåˆå§‹åŒ–SDL åº“ï¼Œæ³¨å†ŒSDL æ¶ˆæ¯äº‹ä»¶ï¼Œå¯åŠ¨æ–‡ä»¶è§£æçº¿ç¨‹ï¼Œè¿›å…¥æ¶ˆæ¯å¾ªç¯ã€‚
+int main(int argc, char **argv) {
+  int flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;
 
-    input_filename = "D:\\workspace\\ffsrc\\CLOCKTXT_320.avi";
+  av_register_all();
 
-    if (SDL_Init(flags))
-	exit(1);
+  input_filename = "D:\\workspace\\ffsrc\\CLOCKTXT_320.avi";
 
-    SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
-    SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
-    SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
-    SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
+  if (SDL_Init(flags))
+    exit(1);
 
-    cur_stream = stream_open(input_filename, file_iformat);
+  SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
+  SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
+  SDL_EventState(SDL_SYSWMEVENT, SDL_IGNORE);
+  SDL_EventState(SDL_USEREVENT, SDL_IGNORE);
 
-    event_loop();
+  cur_stream = stream_open(input_filename, file_iformat);
 
-    return 0;
+  event_loop();
+
+  return 0;
 }

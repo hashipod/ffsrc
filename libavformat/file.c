@@ -12,18 +12,18 @@
 #define open(fname,oflag,pmode) _open(fname,oflag,pmode)
 #endif
 
-// ffplay°Ñfileµ±×öÀàËÆÓÚrtsp£¬rtp£¬tcp µÈĞ­ÒéµÄÒ»ÖÖĞ­Òé£¬ÓÃfile:Ç°×º±êÊ¾fileĞ­Òé¡£
-// URLContext½á¹¹³éÏóÍ³Ò»±íÊ¾ÕâĞ©¹ãÒåÉÏµÄĞ­Òé£¬¶ÔÍâÌá¹©Í³Ò»µÄ³éÏó½Ó¿Ú¡£
-// ¸÷¾ßÌåµÄ¹ãÒåĞ­ÒéÊµÏÖÎÄ¼şÊµÏÖURLContext ½Ó¿Ú¡£´ËÎÄ¼şÊµÏÖÁËfile ¹ãÒåĞ­ÒéµÄURLContext ½Ó¿Ú¡£
+// ffplayæŠŠfileå½“åšç±»ä¼¼äºrtspï¼Œrtpï¼Œtcp ç­‰åè®®çš„ä¸€ç§åè®®ï¼Œç”¨file:å‰ç¼€æ ‡ç¤ºfileåè®®ã€‚
+// URLContextç»“æ„æŠ½è±¡ç»Ÿä¸€è¡¨ç¤ºè¿™äº›å¹¿ä¹‰ä¸Šçš„åè®®ï¼Œå¯¹å¤–æä¾›ç»Ÿä¸€çš„æŠ½è±¡æ¥å£ã€‚
+// å„å…·ä½“çš„å¹¿ä¹‰åè®®å®ç°æ–‡ä»¶å®ç°URLContext æ¥å£ã€‚æ­¤æ–‡ä»¶å®ç°äº†file å¹¿ä¹‰åè®®çš„URLContext æ¥å£ã€‚
 
-// ´ò¿ª±¾µØÃ½ÌåÎÄ¼ş£¬°Ñ±¾µØÎÄ¼ş¾ä±ú×÷Îª¹ãÒåÎÄ¼ş¾ä±ú´æ·ÅÔÚpriv_dataÖĞ¡£
+// æ‰“å¼€æœ¬åœ°åª’ä½“æ–‡ä»¶ï¼ŒæŠŠæœ¬åœ°æ–‡ä»¶å¥æŸ„ä½œä¸ºå¹¿ä¹‰æ–‡ä»¶å¥æŸ„å­˜æ”¾åœ¨priv_dataä¸­ã€‚
 static int file_open(URLContext *h, const char *filename, int flags)
 {
     int access;
     int fd;
-    // ¹æÕû±¾µØÂ·¾¶ÎÄ¼şÃû£¬È¥µôÇ°Ãæ¿ÉÄÜµÄ"file:"×Ö·û´®
+    // è§„æ•´æœ¬åœ°è·¯å¾„æ–‡ä»¶åï¼Œå»æ‰å‰é¢å¯èƒ½çš„"file:"å­—ç¬¦ä¸²
     strstart(filename, "file:", &filename);
-    // ÉèÖÃ±¾µØÎÄ¼ş´æÈ¡ÊôĞÔ¡£
+    // è®¾ç½®æœ¬åœ°æ–‡ä»¶å­˜å–å±æ€§ã€‚
     if (flags &	URL_RDWR)
 	access = O_CREAT | O_TRUNC | O_RDWR;
     else if (flags & URL_WRONLY)
@@ -33,7 +33,7 @@ static int file_open(URLContext *h, const char *filename, int flags)
 #if defined(CONFIG_WIN32) || defined(CONFIG_OS2) || defined(__CYGWIN__)
     access |= O_BINARY;
 #endif
-    // µ÷ÓÃopen()´ò¿ª±¾µØÎÄ¼ş£¬²¢°Ñ±¾µØÎÄ¼ş¾ä±ú×÷Îª¹ãÒåµÄURL¾ä±ú´æ·ÅÔÚpriv_data±äÁ¿ÖĞ¡£
+    // è°ƒç”¨open()æ‰“å¼€æœ¬åœ°æ–‡ä»¶ï¼Œå¹¶æŠŠæœ¬åœ°æ–‡ä»¶å¥æŸ„ä½œä¸ºå¹¿ä¹‰çš„URLå¥æŸ„å­˜æ”¾åœ¨priv_dataå˜é‡ä¸­ã€‚
     fd = open(filename, access, 0666);
     if (fd < 0)
 	return  -ENOENT;
@@ -41,32 +41,32 @@ static int file_open(URLContext *h, const char *filename, int flags)
     return 0;
 }
 
-// ×ª»»¹ãÒåURL¾ä±úÎª±¾µØÎÄ¼ş¾ä±ú£¬µ÷ÓÃread()º¯Êı¶Á±¾µØÎÄ¼ş¡£
+// è½¬æ¢å¹¿ä¹‰URLå¥æŸ„ä¸ºæœ¬åœ°æ–‡ä»¶å¥æŸ„ï¼Œè°ƒç”¨read()å‡½æ•°è¯»æœ¬åœ°æ–‡ä»¶ã€‚
 static int file_read(URLContext *h, unsigned char *buf, int size)
 {
     int fd = (size_t)h->priv_data;
     return read(fd, buf, size);
 }
-// ×ª»»¹ãÒåURL¾ä±úÎª±¾µØÎÄ¼ş¾ä±ú£¬µ÷ÓÃwite()º¯ÊıĞ´±¾µØÎÄ¼ş£¬±¾²¥·ÅÆ÷Ã»Êµ¼ÊÊ¹ÓÃ´Ëº¯Êı¡£
+// è½¬æ¢å¹¿ä¹‰URLå¥æŸ„ä¸ºæœ¬åœ°æ–‡ä»¶å¥æŸ„ï¼Œè°ƒç”¨wite()å‡½æ•°å†™æœ¬åœ°æ–‡ä»¶ï¼Œæœ¬æ’­æ”¾å™¨æ²¡å®é™…ä½¿ç”¨æ­¤å‡½æ•°ã€‚
 static int file_write(URLContext *h, unsigned char *buf, int size)
 {
     int fd = (size_t)h->priv_data;
     return write(fd, buf, size);
 }
-// ×ª»»¹ãÒåURL¾ä±úÎª±¾µØÎÄ¼ş¾ä±ú£¬µ÷ÓÃlseek()º¯ÊıÉèÖÃ±¾µØÎÄ¼ş¶ÁÖ¸Õë¡£
+// è½¬æ¢å¹¿ä¹‰URLå¥æŸ„ä¸ºæœ¬åœ°æ–‡ä»¶å¥æŸ„ï¼Œè°ƒç”¨lseek()å‡½æ•°è®¾ç½®æœ¬åœ°æ–‡ä»¶è¯»æŒ‡é’ˆã€‚
 static offset_t file_seek(URLContext *h, offset_t pos, int whence)
 {
     int fd = (size_t)h->priv_data;
     return lseek(fd, pos, whence);
 }
-// ×ª»»¹ãÒåURL ¾ä±úÎª±¾µØÎÄ¼ş¾ä±ú£¬µ÷ÓÃclose()º¯Êı¹Ø±Õ±¾µØÎÄ¼ş¡£
+// è½¬æ¢å¹¿ä¹‰URL å¥æŸ„ä¸ºæœ¬åœ°æ–‡ä»¶å¥æŸ„ï¼Œè°ƒç”¨close()å‡½æ•°å…³é—­æœ¬åœ°æ–‡ä»¶ã€‚
 static int file_close(URLContext *h)
 {
     int fd = (size_t)h->priv_data;
     return close(fd);
 }
 
-// ÓÃfileĞ­ÒéÏàÓ¦º¯Êı³õÊ¼»¯URLProtocol ½á¹¹¡£
+// ç”¨fileåè®®ç›¸åº”å‡½æ•°åˆå§‹åŒ–URLProtocol ç»“æ„ã€‚
 URLProtocol file_protocol =
 {
 	"file",
@@ -79,5 +79,5 @@ URLProtocol file_protocol =
 
 // https://github.com/feixiao/ffmpeg-2.8.11/blob/master/libavformat/file.c
 
-// ÆäËûĞ­ÒéÈçRTMP
+// å…¶ä»–åè®®å¦‚RTMP
 // https://github.com/feixiao/ffmpeg-2.8.11/blob/master/libavformat/librtmp.c

@@ -5,22 +5,22 @@
 
 #define IO_BUFFER_SIZE 32768
 
-// ³õÊ¼»¯¹ãÒåÎÄ¼şByteIOContext½á¹¹£¬Ò»Ğ©¼òµ¥µÄ¸³Öµ²Ù×÷¡£
-int init_put_byte(ByteIOContext *s,	// ĞèÒª±»³õÊ¼»¯µÄ¶ÔÏó
-    unsigned char *buffer,		// »º´æÊı¾İ´æ·ÅµÄÆğÊ¼µØÖ·
-    int buffer_size,			// »º´æµÄ×î´ó×Ö½ÚÊıÁ¿
-    int write_flag,			// »º´æÊÇ·ñ¿ÉĞ´µÄ±êÖ¾
-    void *opaque,			// º¬ÓĞÏÂÃæ·½·¨µÄ½á¹¹ÌåÖ¸Õë£¬Ò»°ãÇé¿öÏÂÃæÊ¹ÓÃURLContextÀàĞÍµÄÖ¸Õë
-    int(*read_buf)(void *opaque, uint8_t *buf, int buf_size),	// ¶ÁÈ¡Êı¾İµ½»º´æÖĞ(¾ßÌåÊµÏÖÒÀÀµÓÚopaqueµÄÀàĞÍ)
-    int(*write_buf)(void *opaque, uint8_t *buf, int buf_size),	// Ğ´Êı¾İµ½»º´æÖĞ(¾ßÌåÊµÏÖÒÀÀµÓÚopaqueµÄÀàĞÍ)
-    offset_t(*seek)(void *opaque, offset_t offset, int whence))	// ÔÚ»º´æÖĞ×öseek²Ù×÷(¾ßÌåÊµÏÖÒÀÀµÓÚopaqueµÄÀàĞÍ)
+// åˆå§‹åŒ–å¹¿ä¹‰æ–‡ä»¶ByteIOContextç»“æ„ï¼Œä¸€äº›ç®€å•çš„èµ‹å€¼æ“ä½œã€‚
+int init_put_byte(ByteIOContext *s,	// éœ€è¦è¢«åˆå§‹åŒ–çš„å¯¹è±¡
+    unsigned char *buffer,		// ç¼“å­˜æ•°æ®å­˜æ”¾çš„èµ·å§‹åœ°å€
+    int buffer_size,			// ç¼“å­˜çš„æœ€å¤§å­—èŠ‚æ•°é‡
+    int write_flag,			// ç¼“å­˜æ˜¯å¦å¯å†™çš„æ ‡å¿—
+    void *opaque,			// å«æœ‰ä¸‹é¢æ–¹æ³•çš„ç»“æ„ä½“æŒ‡é’ˆï¼Œä¸€èˆ¬æƒ…å†µä¸‹é¢ä½¿ç”¨URLContextç±»å‹çš„æŒ‡é’ˆ
+    int(*read_buf)(void *opaque, uint8_t *buf, int buf_size),	// è¯»å–æ•°æ®åˆ°ç¼“å­˜ä¸­(å…·ä½“å®ç°ä¾èµ–äºopaqueçš„ç±»å‹)
+    int(*write_buf)(void *opaque, uint8_t *buf, int buf_size),	// å†™æ•°æ®åˆ°ç¼“å­˜ä¸­(å…·ä½“å®ç°ä¾èµ–äºopaqueçš„ç±»å‹)
+    offset_t(*seek)(void *opaque, offset_t offset, int whence))	// åœ¨ç¼“å­˜ä¸­åšseekæ“ä½œ(å…·ä½“å®ç°ä¾èµ–äºopaqueçš„ç±»å‹)
 {
     s->buffer = buffer;
     s->buffer_size = buffer_size;
     s->buf_ptr = buffer;
     s->write_flag = write_flag;
     if (!s->write_flag)
-	s->buf_end = buffer;				// ³õÊ¼Çé¿öÏÂ£¬»º´æÖĞÃ»ÓĞĞ§Êı¾İ£¬ËùÒÔbuf_end Ö¸Ïò»º´æÊ×µØÖ·¡£
+	s->buf_end = buffer;				// åˆå§‹æƒ…å†µä¸‹ï¼Œç¼“å­˜ä¸­æ²¡æœ‰æ•ˆæ•°æ®ï¼Œæ‰€ä»¥buf_end æŒ‡å‘ç¼“å­˜é¦–åœ°å€ã€‚
     else
 	s->buf_end = buffer + buffer_size;
     s->opaque = opaque;
@@ -35,19 +35,19 @@ int init_put_byte(ByteIOContext *s,	// ĞèÒª±»³õÊ¼»¯µÄ¶ÔÏó
 
     return 0;
 }
-// ¹ãÒåÎÄ¼şByteIOContext µÄseek ²Ù×÷¡£
-// ÊäÈë±äÁ¿£ºs Îª¹ãÒåÎÄ¼ş¾ä±ú£¬offset ÎªÆ«ÒÆÁ¿£¬whence Îª¶¨Î»·½Ê½¡£
-// Êä³ö±äÁ¿£ºÏà¶Ô¹ãÒåÎÄ¼ş¿ªÊ¼µÄÆ«ÒÆÁ¿¡£
+// å¹¿ä¹‰æ–‡ä»¶ByteIOContext çš„seek æ“ä½œã€‚
+// è¾“å…¥å˜é‡ï¼šs ä¸ºå¹¿ä¹‰æ–‡ä»¶å¥æŸ„ï¼Œoffset ä¸ºåç§»é‡ï¼Œwhence ä¸ºå®šä½æ–¹å¼ã€‚
+// è¾“å‡ºå˜é‡ï¼šç›¸å¯¹å¹¿ä¹‰æ–‡ä»¶å¼€å§‹çš„åç§»é‡ã€‚
 offset_t url_fseek(ByteIOContext *s, offset_t offset, int whence)
 {
     offset_t offset1;
-    // Ö»Ö§³ÖSEEK_CURºÍSEEK_SET¶¨Î»·½Ê½£¬²»Ö§³ÖSEEK_END·½Ê½¡£
-    // SEEK_CUR: ´ÓÎÄ¼şµ±Ç°¶ÁĞ´Î»ÖÃÎª»ù×¼Æ«ÒÆoffset×Ö½Ú¡£
-    // SEEK_SET: ´ÓÎÄ¼ş¿ªÊ¼Î»ÖÃÆ«ÒÆoffset×Ö½Ú¡£
+    // åªæ”¯æŒSEEK_CURå’ŒSEEK_SETå®šä½æ–¹å¼ï¼Œä¸æ”¯æŒSEEK_ENDæ–¹å¼ã€‚
+    // SEEK_CUR: ä»æ–‡ä»¶å½“å‰è¯»å†™ä½ç½®ä¸ºåŸºå‡†åç§»offsetå­—èŠ‚ã€‚
+    // SEEK_SET: ä»æ–‡ä»¶å¼€å§‹ä½ç½®åç§»offsetå­—èŠ‚ã€‚
     if (whence != SEEK_CUR && whence != SEEK_SET)
 	return  -EINVAL;
 
-    // ffplay °ÑSEEK_CURºÍSEEK_SETÍ³Ò»³ÉSEEK_SET·½Ê½´¦Àí£¬ËùÒÔÈç¹ûÊÇSEEK_CUR·½Ê½¾ÍÒª×ª»»³ÉSEEK_SETµÄÆ«ÒÆÁ¿¡£
+    // ffplay æŠŠSEEK_CURå’ŒSEEK_SETç»Ÿä¸€æˆSEEK_SETæ–¹å¼å¤„ç†ï¼Œæ‰€ä»¥å¦‚æœæ˜¯SEEK_CURæ–¹å¼å°±è¦è½¬æ¢æˆSEEK_SETçš„åç§»é‡ã€‚
     if (whence == SEEK_CUR)
     {
 	offset1 = s->pos - (s->buf_end - s->buffer) + (s->buf_ptr - s->buffer);
@@ -75,17 +75,17 @@ offset_t url_fseek(ByteIOContext *s, offset_t offset, int whence)
     return offset;
 }
 
-// ¹ãÒåÎÄ¼şByteIOContextµÄµ±Ç°Êµ¼ÊÆ«ÒÆÁ¿ÔÙÆ«ÒÆoffset×Ö½Ú£¬µ÷ÓÃurl_fseekÊµÏÖ¡£
+// å¹¿ä¹‰æ–‡ä»¶ByteIOContextçš„å½“å‰å®é™…åç§»é‡å†åç§»offsetå­—èŠ‚ï¼Œè°ƒç”¨url_fseekå®ç°ã€‚
 void url_fskip(ByteIOContext *s, offset_t offset)
 {
     url_fseek(s, offset, SEEK_CUR);
 }
-// ·µ»Ø¹ãÒåÎÄ¼şByteIOContextµÄµ±Ç°Êµ¼ÊÆ«ÒÆÁ¿¡£
+// è¿”å›å¹¿ä¹‰æ–‡ä»¶ByteIOContextçš„å½“å‰å®é™…åç§»é‡ã€‚
 offset_t url_ftell(ByteIOContext *s)
 {
     return url_fseek(s, 0, SEEK_CUR);
 }
-// ·µ»Ø¹ãÒåÎÄ¼şByteIOContextµÄ´óĞ¡¡£
+// è¿”å›å¹¿ä¹‰æ–‡ä»¶ByteIOContextçš„å¤§å°ã€‚
 offset_t url_fsize(ByteIOContext *s)
 {
     offset_t size;
@@ -96,59 +96,59 @@ offset_t url_fsize(ByteIOContext *s)
     s->seek(s->opaque, s->pos, SEEK_SET);
     return size;
 }
-// ÅĞ¶Ïµ±Ç°¹ãÒåÎÄ¼şByteIOContextÊÇ·ñµ½Ä©Î²
+// åˆ¤æ–­å½“å‰å¹¿ä¹‰æ–‡ä»¶ByteIOContextæ˜¯å¦åˆ°æœ«å°¾
 int url_feof(ByteIOContext *s)
 {
     return s->eof_reached;
 }
-// ·µ»Øµ±Ç°¹ãÒåÎÄ¼şByteIOContext²Ù×÷´íÎóÂë
+// è¿”å›å½“å‰å¹¿ä¹‰æ–‡ä»¶ByteIOContextæ“ä½œé”™è¯¯ç 
 int url_ferror(ByteIOContext *s)
 {
     return s->error;
 }
 
 // Input stream
-// Ìî³ä¹ãÒåÎÄ¼şByteIOContext ÄÚ²¿µÄÊı¾İ»º´æÇø¡£
+// å¡«å……å¹¿ä¹‰æ–‡ä»¶ByteIOContext å†…éƒ¨çš„æ•°æ®ç¼“å­˜åŒºã€‚
 static void fill_buffer(ByteIOContext *s)
 {
     int len;
-    // Èç¹ûµ½ÁË¹ãÒåÎÄ¼şByteIOContextÄ©Î²¾ÍÖ±½Ó·µ»Ø¡£
+    // å¦‚æœåˆ°äº†å¹¿ä¹‰æ–‡ä»¶ByteIOContextæœ«å°¾å°±ç›´æ¥è¿”å›ã€‚
     if (s->eof_reached)
 	return;
 
-    // µ÷ÓÃµ×²ãÎÄ¼şÏµÍ³µÄ¶Áº¯ÊıÊµ¼Ê¶ÁÊı¾İÌîµ½»º´æ£¬×¢ÒâÕâÀï¾­¹ıÁËºÃ¼¸´ÎÌø×ª²Åµ½µ×²ã¶Áº¯Êı¡£
-    // Ê×ÏÈÌø×ªµÄurl_read_buf()º¯Êı£¬ÔÙÌø×ªµ½url_read()£¬ÔÙÌø×ªµ½Êµ¼ÊÎÄ¼şĞ­ÒéµÄ¶Áº¯ÊıÍê³É¶Á²Ù×÷¡£
+    // è°ƒç”¨åº•å±‚æ–‡ä»¶ç³»ç»Ÿçš„è¯»å‡½æ•°å®é™…è¯»æ•°æ®å¡«åˆ°ç¼“å­˜ï¼Œæ³¨æ„è¿™é‡Œç»è¿‡äº†å¥½å‡ æ¬¡è·³è½¬æ‰åˆ°åº•å±‚è¯»å‡½æ•°ã€‚
+    // é¦–å…ˆè·³è½¬çš„url_read_buf()å‡½æ•°ï¼Œå†è·³è½¬åˆ°url_read()ï¼Œå†è·³è½¬åˆ°å®é™…æ–‡ä»¶åè®®çš„è¯»å‡½æ•°å®Œæˆè¯»æ“ä½œã€‚
     len = s->read_buf(s->opaque, s->buffer, s->buffer_size);
     if (len <= 0)
     {
 	// do not modify buffer if EOF reached so that a seek back can be done without rereading data
-	// Èç¹ûÊÇµ½´ïÎÄ¼şÄ©Î²¾Í²»Òª¸Äbuffer²ÎÊı£¬ÕâÑù²»ÓÃÖØĞÂ¶ÁÊı¾İ¾Í¿ÉÒÔ×öseek back ²Ù×÷¡£
+	// å¦‚æœæ˜¯åˆ°è¾¾æ–‡ä»¶æœ«å°¾å°±ä¸è¦æ”¹bufferå‚æ•°ï¼Œè¿™æ ·ä¸ç”¨é‡æ–°è¯»æ•°æ®å°±å¯ä»¥åšseek back æ“ä½œã€‚
 	s->eof_reached = 1;
 
-	// ÉèÖÃ´íÎóÂë£¬±ãÓÚ·ÖÎö¶¨Î»¡£
+	// è®¾ç½®é”™è¯¯ç ï¼Œä¾¿äºåˆ†æå®šä½ã€‚
 	if (len < 0)
 	    s->error = len;
     }
     else
     {
-	// Èç¹ûÕıÈ·¶ÁÈ¡£¬ĞŞ¸ÄÒ»ÏÂ»ù±¾²ÎÊı
+	// å¦‚æœæ­£ç¡®è¯»å–ï¼Œä¿®æ”¹ä¸€ä¸‹åŸºæœ¬å‚æ•°
 	s->pos += len;
 	s->buf_ptr = s->buffer;
 	s->buf_end = s->buffer + len;
     }
 }
 
-// ´Ó¹ãÒåÎÄ¼şByteIOContext ÖĞ¶ÁÈ¡Ò»¸ö×Ö½Ú¡£
+// ä»å¹¿ä¹‰æ–‡ä»¶ByteIOContext ä¸­è¯»å–ä¸€ä¸ªå­—èŠ‚ã€‚
 int get_byte(ByteIOContext *s) // NOTE: return 0 if EOF, so you cannot use it if EOF handling is necessary
 {
     if (s->buf_ptr < s->buf_end)
     {
-	// Èç¹û¹ãÒåÎÄ¼şByteIOContextÄÚ²¿»º´æÓĞÊı¾İ£¬¾ÍĞŞ¸Ä¶ÁÖ¸Õë£¬·µ»Ø¶ÁÈ¡µÄÊı¾İ¡£
+	// å¦‚æœå¹¿ä¹‰æ–‡ä»¶ByteIOContextå†…éƒ¨ç¼“å­˜æœ‰æ•°æ®ï¼Œå°±ä¿®æ”¹è¯»æŒ‡é’ˆï¼Œè¿”å›è¯»å–çš„æ•°æ®ã€‚
 	return  *s->buf_ptr++;
     }
     else
     {
-	// Èç¹û¹ãÒåÎÄ¼şByteIOContext ÄÚ²¿»º´æÃ»ÓĞÊı¾İ£¬¾ÍÏÈÌî³äÄÚ²¿»º´æ¡£
+	// å¦‚æœå¹¿ä¹‰æ–‡ä»¶ByteIOContext å†…éƒ¨ç¼“å­˜æ²¡æœ‰æ•°æ®ï¼Œå°±å…ˆå¡«å……å†…éƒ¨ç¼“å­˜ã€‚
 	fill_buffer(s);
 	if (s->buf_ptr < s->buf_end)
 	    return  *s->buf_ptr++;
@@ -156,7 +156,7 @@ int get_byte(ByteIOContext *s) // NOTE: return 0 if EOF, so you cannot use it if
 	    return 0;
     }
 }
-// ´Ó¹ãÒåÎÄ¼şByteIOContext ÖĞÒÔĞ¡¶Ë·½Ê½¶ÁÈ¡Á½¸ö×Ö½Ú, ÊµÏÖ´úÂë³ä·Ö¸´ÓÃget_byte()º¯Êı¡£
+// ä»å¹¿ä¹‰æ–‡ä»¶ByteIOContext ä¸­ä»¥å°ç«¯æ–¹å¼è¯»å–ä¸¤ä¸ªå­—èŠ‚, å®ç°ä»£ç å……åˆ†å¤ç”¨get_byte()å‡½æ•°ã€‚
 unsigned int get_le16(ByteIOContext *s)
 {
     unsigned int val;
@@ -164,7 +164,7 @@ unsigned int get_le16(ByteIOContext *s)
     val |= get_byte(s) << 8;
     return val;
 }
-// ´Ó¹ãÒåÎÄ¼şByteIOContext ÖĞÒÔĞ¡¶Ë·½Ê½¶ÁÈ¡ËÄ¸ö×Ö½Ú, ÊµÏÖ´úÂë³ä·Ö¸´ÓÃget_le16()º¯Êı¡£
+// ä»å¹¿ä¹‰æ–‡ä»¶ByteIOContext ä¸­ä»¥å°ç«¯æ–¹å¼è¯»å–å››ä¸ªå­—èŠ‚, å®ç°ä»£ç å……åˆ†å¤ç”¨get_le16()å‡½æ•°ã€‚
 unsigned int get_le32(ByteIOContext *s)
 {
     unsigned int val;
@@ -175,29 +175,29 @@ unsigned int get_le32(ByteIOContext *s)
 
 #define url_write_buf NULL
 
-// ¼òµ¥ÖĞ×ª¶Á²Ù×÷º¯Êı¡£
+// ç®€å•ä¸­è½¬è¯»æ“ä½œå‡½æ•°ã€‚
 static int url_read_buf(void *opaque, uint8_t *buf, int buf_size)
 {
     URLContext *h = opaque;
     return url_read(h, buf, buf_size);
 }
 
-// ¼òµ¥ÖĞ×ªseek ²Ù×÷º¯Êı¡£
+// ç®€å•ä¸­è½¬seek æ“ä½œå‡½æ•°ã€‚
 static offset_t url_seek_buf(void *opaque, offset_t offset, int whence)
 {
     URLContext *h = opaque;
     return url_seek(h, offset, whence);
 }
-// ÉèÖÃ²¢·ÖÅä¹ãÒåÎÄ¼şByteIOContext ÄÚ²¿»º´æµÄ´óĞ¡¡£
+// è®¾ç½®å¹¶åˆ†é…å¹¿ä¹‰æ–‡ä»¶ByteIOContext å†…éƒ¨ç¼“å­˜çš„å¤§å°ã€‚
 int url_setbufsize(ByteIOContext *s, int buf_size) // must be called before any I/O
 {
     uint8_t *buffer;
-    // ·ÖÅä¹ãÒåÎÄ¼şByteIOContext ÄÚ²¿»º´æ¡£
+    // åˆ†é…å¹¿ä¹‰æ–‡ä»¶ByteIOContext å†…éƒ¨ç¼“å­˜ã€‚
     buffer = av_malloc(buf_size);
     if (!buffer)
 	return  -ENOMEM;
 
-    // ÉèÖÃ¹ãÒåÎÄ¼şByteIOContext ÄÚ²¿»º´æÏà¹Ø²ÎÊı¡£
+    // è®¾ç½®å¹¿ä¹‰æ–‡ä»¶ByteIOContext å†…éƒ¨ç¼“å­˜ç›¸å…³å‚æ•°ã€‚
     av_free(s->buffer);
     s->buffer = buffer;
     s->buffer_size = buf_size;
@@ -209,19 +209,19 @@ int url_setbufsize(ByteIOContext *s, int buf_size) // must be called before any 
     return 0;
 }
 
-// ´ò¿ª¹ãÒåÎÄ¼şByteIOContext
+// æ‰“å¼€å¹¿ä¹‰æ–‡ä»¶ByteIOContext
 int url_fopen(ByteIOContext *s, const char *filename, int flags)
 {
     URLContext *h;
     uint8_t *buffer;
     int buffer_size, max_packet_size;
     int err;
-    // µ÷ÓÃµ×²ãÎÄ¼şÏµÍ³µÄopenº¯ÊıÊµÖÊĞÔ´ò¿ªÎÄ¼ş
+    // è°ƒç”¨åº•å±‚æ–‡ä»¶ç³»ç»Ÿçš„openå‡½æ•°å®è´¨æ€§æ‰“å¼€æ–‡ä»¶
     err = url_open(&h, filename, flags);
     if (err < 0)
 	return err;
 
-    // ¶ÁÈ¡µ×²ãÎÄ¼şÏµÍ³Ö§³ÖµÄ×î´ó°ü´óĞ¡¡£Èç¹û·Ç0£¬ÔòÉèÖÃÎªÄÚ²¿»º´æµÄ´óĞ¡£»·ñÔòÄÚ²¿»º´æÉèÖÃÎªÄ¬ÈÏ´óĞ¡IO_BUFFER_SIZE(32768 ×Ö½Ú)¡£
+    // è¯»å–åº•å±‚æ–‡ä»¶ç³»ç»Ÿæ”¯æŒçš„æœ€å¤§åŒ…å¤§å°ã€‚å¦‚æœé0ï¼Œåˆ™è®¾ç½®ä¸ºå†…éƒ¨ç¼“å­˜çš„å¤§å°ï¼›å¦åˆ™å†…éƒ¨ç¼“å­˜è®¾ç½®ä¸ºé»˜è®¤å¤§å°IO_BUFFER_SIZE(32768 å­—èŠ‚)ã€‚
     max_packet_size = url_get_max_packet_size(h);
     if (max_packet_size)
     {
@@ -231,7 +231,7 @@ int url_fopen(ByteIOContext *s, const char *filename, int flags)
     {
 	buffer_size = IO_BUFFER_SIZE;
     }
-    // ·ÖÅä¹ãÒåÎÄ¼şByteIOContext ÄÚ²¿»º´æ£¬Èç¹û´íÎó¾Í¹Ø±ÕÎÄ¼ş·µ»Ø´íÎóÂë¡£
+    // åˆ†é…å¹¿ä¹‰æ–‡ä»¶ByteIOContext å†…éƒ¨ç¼“å­˜ï¼Œå¦‚æœé”™è¯¯å°±å…³é—­æ–‡ä»¶è¿”å›é”™è¯¯ç ã€‚
     buffer = av_malloc(buffer_size);
     if (!buffer)
     {
@@ -239,7 +239,7 @@ int url_fopen(ByteIOContext *s, const char *filename, int flags)
 	return  -ENOMEM;
     }
 
-    // ³õÊ¼»¯¹ãÒåÎÄ¼şByteIOContext Êı¾İ½á¹¹£¬Èç¹û´íÎó¾Í¹Ø±ÕÎÄ¼ş£¬ÊÍ·ÅÄÚ²¿»º´æ£¬·µ»Ø´íÎóÂë
+    // åˆå§‹åŒ–å¹¿ä¹‰æ–‡ä»¶ByteIOContext æ•°æ®ç»“æ„ï¼Œå¦‚æœé”™è¯¯å°±å…³é—­æ–‡ä»¶ï¼Œé‡Šæ”¾å†…éƒ¨ç¼“å­˜ï¼Œè¿”å›é”™è¯¯ç 
     if (init_put_byte(s,
 	buffer,
 	buffer_size,
@@ -254,13 +254,13 @@ int url_fopen(ByteIOContext *s, const char *filename, int flags)
 	return AVERROR_IO;
     }
 
-    // ±£´æ×î´ó°ü´óĞ¡¡£
+    // ä¿å­˜æœ€å¤§åŒ…å¤§å°ã€‚
     s->max_packet_size = max_packet_size;
 
     return 0;
 }
 
-// ¹Ø±Õ¹ãÒåÎÄ¼şByteIOContext£¬Ê×ÏÈÊÍ·ÅµôÄÚ²¿Ê¹ÓÃµÄ»º´æ£¬ÔÙ°Ñ×Ô¼ºµÄ×Ö¶ÎÖÃ0£¬×îºó×ªÈëµ×²ãÎÄ¼şÏµÍ³µÄ¹Ø±Õº¯ÊıÊµÖÊĞÔ¹Ø±ÕÎÄ¼ş¡£
+// å…³é—­å¹¿ä¹‰æ–‡ä»¶ByteIOContextï¼Œé¦–å…ˆé‡Šæ”¾æ‰å†…éƒ¨ä½¿ç”¨çš„ç¼“å­˜ï¼Œå†æŠŠè‡ªå·±çš„å­—æ®µç½®0ï¼Œæœ€åè½¬å…¥åº•å±‚æ–‡ä»¶ç³»ç»Ÿçš„å…³é—­å‡½æ•°å®è´¨æ€§å…³é—­æ–‡ä»¶ã€‚
 int url_fclose(ByteIOContext *s)
 {
     URLContext *h = s->opaque;
@@ -269,29 +269,29 @@ int url_fclose(ByteIOContext *s)
     memset(s, 0, sizeof(ByteIOContext));
     return url_close(h);
 }
-// ¹ãÒåÎÄ¼şByteIOContext ¶Á²Ù×÷£¬×¢Òâ´Ëº¯Êı´Óget_buffer ¸ÄÃû¶øÀ´£¬¸üÌùÇĞº¯Êı¹¦ÄÜ£¬Ò²ÎªÁËÍê±¸¹ãÒåÎÄ¼ş²Ù×÷º¯Êı¼¯¡£
+// å¹¿ä¹‰æ–‡ä»¶ByteIOContext è¯»æ“ä½œï¼Œæ³¨æ„æ­¤å‡½æ•°ä»get_buffer æ”¹åè€Œæ¥ï¼Œæ›´è´´åˆ‡å‡½æ•°åŠŸèƒ½ï¼Œä¹Ÿä¸ºäº†å®Œå¤‡å¹¿ä¹‰æ–‡ä»¶æ“ä½œå‡½æ•°é›†ã€‚
 int url_fread(ByteIOContext *s, unsigned char *buf, int size) // get_buffer
 {
     int len, size1;
-    // ¿¼ÂÇµ½size¿ÉÄÜ±È»º´æÖĞµÄÊı¾İ´óµÃ¶à£¬´ËÊ±¾Í¶à´Î¶Á»º´æ£¬ËùÒÔÓÃsize1±£´æÒª¶ÁÈ¡µÄ×Ü×Ö½ÚÊı£¬
-    // sizeÒâÒå±ä¸üÎª»¹ĞèÒª¶ÁÈ¡µÄ×Ö½ÚÊı¡£
+    // è€ƒè™‘åˆ°sizeå¯èƒ½æ¯”ç¼“å­˜ä¸­çš„æ•°æ®å¤§å¾—å¤šï¼Œæ­¤æ—¶å°±å¤šæ¬¡è¯»ç¼“å­˜ï¼Œæ‰€ä»¥ç”¨size1ä¿å­˜è¦è¯»å–çš„æ€»å­—èŠ‚æ•°ï¼Œ
+    // sizeæ„ä¹‰å˜æ›´ä¸ºè¿˜éœ€è¦è¯»å–çš„å­—èŠ‚æ•°ã€‚
     size1 = size;
-    // Èç¹û»¹ĞèÒª¶ÁµÄ×Ö½ÚÊı´óÓÚ0£¬¾Í½øÈëÑ­»·¼ÌĞø¶Á¡£
+    // å¦‚æœè¿˜éœ€è¦è¯»çš„å­—èŠ‚æ•°å¤§äº0ï¼Œå°±è¿›å…¥å¾ªç¯ç»§ç»­è¯»ã€‚
     while (size > 0)
     {
-	// ¼ÆËãµ±´ÎÑ­»·Ó¦¸Ã¶ÁÈ¡µÄ×Ö½ÚÊılen£¬Ê×ÏÈÉèÖÃlenÎªÄÚ²¿»º´æÊı¾İ³¤¶È£¬ÔÙºÍĞèÒª¶ÁµÄ×Ö½ÚÊısize±È£¬ÓĞÌõ¼şĞŞÕılenµÄÖµ¡£
+	// è®¡ç®—å½“æ¬¡å¾ªç¯åº”è¯¥è¯»å–çš„å­—èŠ‚æ•°lenï¼Œé¦–å…ˆè®¾ç½®lenä¸ºå†…éƒ¨ç¼“å­˜æ•°æ®é•¿åº¦ï¼Œå†å’Œéœ€è¦è¯»çš„å­—èŠ‚æ•°sizeæ¯”ï¼Œæœ‰æ¡ä»¶ä¿®æ­£lençš„å€¼ã€‚
 	len = s->buf_end - s->buf_ptr;
 	if (len > size)
 	    len = size;
-	if (len == 0)		// Èç¹ûÄÚ²¿»º´æÃ»ÓĞÊı¾İ¡£
+	if (len == 0)		// å¦‚æœå†…éƒ¨ç¼“å­˜æ²¡æœ‰æ•°æ®ã€‚
 	{
 	    if (size > s->buffer_size)
 	    {
-		// Èç¹ûÒª¶ÁÈ¡µÄÊı¾İÁ¿±ÈÄÚ²¿»º´æÊı¾İÁ¿´ó£¬¾Íµ÷ÓÃµ×²ãº¯Êı¶ÁÈ¡Êı¾İÈÆ¹ıÄÚ²¿»º´æÖ±½Óµ½Ä¿±ê»º´æ¡£
+		// å¦‚æœè¦è¯»å–çš„æ•°æ®é‡æ¯”å†…éƒ¨ç¼“å­˜æ•°æ®é‡å¤§ï¼Œå°±è°ƒç”¨åº•å±‚å‡½æ•°è¯»å–æ•°æ®ç»•è¿‡å†…éƒ¨ç¼“å­˜ç›´æ¥åˆ°ç›®æ ‡ç¼“å­˜ã€‚
 		len = s->read_buf(s->opaque, buf, size);
 		if (len <= 0)
 		{
-		    // Èç¹ûµ×²ãÎÄ¼şÏµÍ³¶Á´íÎó£¬ÉèÖÃÎÄ¼şÄ©Î²±ê¼ÇºÍ´íÎóÂë£¬Ìø³öÑ­»·£¬·µ»ØÊµ¼Ê¶Áµ½µÄ×Ö½ÚÊı¡£
+		    // å¦‚æœåº•å±‚æ–‡ä»¶ç³»ç»Ÿè¯»é”™è¯¯ï¼Œè®¾ç½®æ–‡ä»¶æœ«å°¾æ ‡è®°å’Œé”™è¯¯ç ï¼Œè·³å‡ºå¾ªç¯ï¼Œè¿”å›å®é™…è¯»åˆ°çš„å­—èŠ‚æ•°ã€‚
 		    s->eof_reached = 1;
 		    if (len < 0)
 			s->error = len;
@@ -299,7 +299,7 @@ int url_fread(ByteIOContext *s, unsigned char *buf, int size) // get_buffer
 		}
 		else
 		{
-		    // Èç¹ûµ×²ãÎÄ¼şÏµÍ³ÕıÈ·¶Á£¬ĞŞ¸ÄÏà¹Ø²ÎÊı£¬½øÈëÏÂÒ»ÂÖÑ­»·¡£ÌØ±ğ×¢Òâ´Ë´¦¶ÁÎÄ¼şÈÆ¹ıÁËÄÚ²¿»º´æ¡£
+		    // å¦‚æœåº•å±‚æ–‡ä»¶ç³»ç»Ÿæ­£ç¡®è¯»ï¼Œä¿®æ”¹ç›¸å…³å‚æ•°ï¼Œè¿›å…¥ä¸‹ä¸€è½®å¾ªç¯ã€‚ç‰¹åˆ«æ³¨æ„æ­¤å¤„è¯»æ–‡ä»¶ç»•è¿‡äº†å†…éƒ¨ç¼“å­˜ã€‚
 		    s->pos += len;
 		    size -= len;
 		    buf += len;
@@ -309,7 +309,7 @@ int url_fread(ByteIOContext *s, unsigned char *buf, int size) // get_buffer
 	    }
 	    else
 	    {
-		// Èç¹ûÒª¶ÁÈ¡µÄÊı¾İÁ¿±ÈÄÚ²¿»º´æÊı¾İÁ¿Ğ¡£¬¾Íµ÷ÓÃµ×²ãº¯Êı¶ÁÈ¡Êı¾İµ½ÄÚ²¿»º´æ£¬ÅĞ¶ÏÊÇ·ñ¶Á³É¡£
+		// å¦‚æœè¦è¯»å–çš„æ•°æ®é‡æ¯”å†…éƒ¨ç¼“å­˜æ•°æ®é‡å°ï¼Œå°±è°ƒç”¨åº•å±‚å‡½æ•°è¯»å–æ•°æ®åˆ°å†…éƒ¨ç¼“å­˜ï¼Œåˆ¤æ–­æ˜¯å¦è¯»æˆã€‚
 		fill_buffer(s);
 		len = s->buf_end - s->buf_ptr;
 		if (len == 0)
@@ -318,13 +318,13 @@ int url_fread(ByteIOContext *s, unsigned char *buf, int size) // get_buffer
 	}
 	else
 	{
-	    // Èç¹ûÄÚ²¿»º´æÓĞÊı¾İ£¬¾Í¿½±´len ³¤¶ÈµÄÊı¾İµ½»º´æÇø£¬²¢ĞŞ¸ÄÏà¹Ø²ÎÊı£¬½øÈëÏÂÒ»¸öÑ­»·µÄÌõ¼şÅĞ¶Ï¡£
+	    // å¦‚æœå†…éƒ¨ç¼“å­˜æœ‰æ•°æ®ï¼Œå°±æ‹·è´len é•¿åº¦çš„æ•°æ®åˆ°ç¼“å­˜åŒºï¼Œå¹¶ä¿®æ”¹ç›¸å…³å‚æ•°ï¼Œè¿›å…¥ä¸‹ä¸€ä¸ªå¾ªç¯çš„æ¡ä»¶åˆ¤æ–­ã€‚
 	    memcpy(buf, s->buf_ptr, len);
 	    buf += len;
 	    s->buf_ptr += len;
 	    size -= len;
 	}
     }
-    // ·µ»ØÊµ¼Ê¶ÁÈ¡µÄ×Ö½ÚÊı¡£
+    // è¿”å›å®é™…è¯»å–çš„å­—èŠ‚æ•°ã€‚
     return size1 - size;
 }

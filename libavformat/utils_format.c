@@ -7,7 +7,7 @@
 #define PROBE_BUF_MIN 2048
 #define PROBE_BUF_MAX 131072
 
-// Ê¶±ğÎÄ¼ş¸ñÊ½ºÍÃ½Ìå¸ñÊ½²¿·ÖÊ¹ÓÃµÄÒ»Ğ©¹¤¾ßÀàº¯Êı¡£
+// è¯†åˆ«æ–‡ä»¶æ ¼å¼å’Œåª’ä½“æ ¼å¼éƒ¨åˆ†ä½¿ç”¨çš„ä¸€äº›å·¥å…·ç±»å‡½æ•°ã€‚
 
 AVInputFormat *first_iformat = NULL;
 
@@ -16,15 +16,15 @@ void av_register_input_format(AVInputFormat *format)
 {
     AVInputFormat **p;
     p = &first_iformat;
-    // Ñ­»·ÒÆ¶¯½ÚµãÖ¸Õëµ½×îºóÒ»¸öÎÄ¼şÈİÆ÷¸ñÊ½¡£
+    // å¾ªç¯ç§»åŠ¨èŠ‚ç‚¹æŒ‡é’ˆåˆ°æœ€åä¸€ä¸ªæ–‡ä»¶å®¹å™¨æ ¼å¼ã€‚
     while (*p != NULL)
 	p = &(*p)->next;
-    // Ö±½Ó¹Ò½ÓÒª×¢²áµÄÎÄ¼şÈİÆ÷¸ñÊ½¡£
+    // ç›´æ¥æŒ‚æ¥è¦æ³¨å†Œçš„æ–‡ä»¶å®¹å™¨æ ¼å¼ã€‚
     *p = format;
     format->next = NULL;
 }
 
-// ±È½ÏÎÄ¼şµÄÀ©Õ¹ÃûÀ´Ê¶±ğÎÄ¼şÀàĞÍ¡£
+// æ¯”è¾ƒæ–‡ä»¶çš„æ‰©å±•åæ¥è¯†åˆ«æ–‡ä»¶ç±»å‹ã€‚
 int match_ext(const char *filename, const char *extensions)
 {
     const char *ext, *p;
@@ -33,7 +33,7 @@ int match_ext(const char *filename, const char *extensions)
     if (!filename)
 	return 0;
 
-    // ÓÃ'.'ºÅ×÷ÎªÀ©Õ¹Ãû·Ö¸î·û£¬ÔÚÎÄ¼şÃûÖĞÕÒÀ©Õ¹Ãû·Ö¸î·û¡£
+    // ç”¨'.'å·ä½œä¸ºæ‰©å±•ååˆ†å‰²ç¬¦ï¼Œåœ¨æ–‡ä»¶åä¸­æ‰¾æ‰©å±•ååˆ†å‰²ç¬¦ã€‚
     ext = strrchr(filename, '.');
     if (ext)
     {
@@ -41,14 +41,14 @@ int match_ext(const char *filename, const char *extensions)
 	p = extensions;
 	for (;;)
 	{
-	    // ÎÄ¼şÃûÖĞ¿ÉÄÜÓĞ¶à¸ö±êµã·ûºÅ£¬È¡Á½¸ö±êµã·ûºÅ¼ä»òÒ»¸ö±êµãºÍÒ»¸ö½áÊø·û¼äµÄ×Ö·û´®ºÍÀ©Õ¹Ãû±È½ÏÀ´ÅĞ¶ÏÎÄ¼şÀàĞÍ£¬ËùÒÔ¿ÉÄÜÒª¶à´Î±È½Ï£¬ËùÒÔÕâÀïÓĞÒ»¸öÑ­»·¡£
+	    // æ–‡ä»¶åä¸­å¯èƒ½æœ‰å¤šä¸ªæ ‡ç‚¹ç¬¦å·ï¼Œå–ä¸¤ä¸ªæ ‡ç‚¹ç¬¦å·é—´æˆ–ä¸€ä¸ªæ ‡ç‚¹å’Œä¸€ä¸ªç»“æŸç¬¦é—´çš„å­—ç¬¦ä¸²å’Œæ‰©å±•åæ¯”è¾ƒæ¥åˆ¤æ–­æ–‡ä»¶ç±»å‹ï¼Œæ‰€ä»¥å¯èƒ½è¦å¤šæ¬¡æ¯”è¾ƒï¼Œæ‰€ä»¥è¿™é‡Œæœ‰ä¸€ä¸ªå¾ªç¯ã€‚
 	    q = ext1;
-	    // ¶¨Î»ÏÂÒ»¸ö±êµã·ûºÅ»ò×Ö·û´®½áÊø·û£¬°ÑÕâÖ®¼äµÄ×Ö·û¿½±´µ½À©Õ¹Ãû×Ö·ûÊı×éÖĞ¡£
+	    // å®šä½ä¸‹ä¸€ä¸ªæ ‡ç‚¹ç¬¦å·æˆ–å­—ç¬¦ä¸²ç»“æŸç¬¦ï¼ŒæŠŠè¿™ä¹‹é—´çš„å­—ç¬¦æ‹·è´åˆ°æ‰©å±•åå­—ç¬¦æ•°ç»„ä¸­ã€‚
 	    while (*p != '\0' &&  *p != ',' && q - ext1 < sizeof(ext1) - 1)
 		*q++ = *p++;
-	    // Ìí¼ÓÀ©Õ¹Ãû×Ö·û´®½áÊø±ê¼Ç0¡£
+	    // æ·»åŠ æ‰©å±•åå­—ç¬¦ä¸²ç»“æŸæ ‡è®°0ã€‚
 	    *q = '\0';
-	    // ±È½ÏÊ¶±ğµÄÀ©Õ¹ÃûÊÇ·ñºó¸ø¶¨µÄÀ©Õ¹ÃûÏàÍ¬£¬Èç¹ûÏàÍ¬¾Í·µ»Ø1£¬·ñÔò¼ÌĞø
+	    // æ¯”è¾ƒè¯†åˆ«çš„æ‰©å±•åæ˜¯å¦åç»™å®šçš„æ‰©å±•åç›¸åŒï¼Œå¦‚æœç›¸åŒå°±è¿”å›1ï¼Œå¦åˆ™ç»§ç»­
 	    if (!strcasecmp(ext1, ext))
 		return 1;
 	    if (*p == '\0')
@@ -56,16 +56,16 @@ int match_ext(const char *filename, const char *extensions)
 	    p++;
 	}
     }
-    // Èç¹ûÔÚÇ°ÃæµÄÑ­»·ÖĞÃ»ÓĞÆ¥Åäµ½À©Õ¹Ãû£¬¾ÍÊÇ²»Ê¶±ğµÄÎÄ¼şÀàĞÍ·µ»Ø0
+    // å¦‚æœåœ¨å‰é¢çš„å¾ªç¯ä¸­æ²¡æœ‰åŒ¹é…åˆ°æ‰©å±•åï¼Œå°±æ˜¯ä¸è¯†åˆ«çš„æ–‡ä»¶ç±»å‹è¿”å›0
     return 0;
 }
 
-// Ì½²âÊäÈëµÄÎÄ¼şÈİÆ÷¸ñÊ½£¬·µ»ØÊ¶±ğ³öÀ´µÄÎÄ¼ş¸ñÊ½¡£Èç¹ûÃ»ÓĞÊ¶±ğ³öÀ´£¬¾Í·µ»Ø³õÊ¼ÖµNULL¡£
+// æ¢æµ‹è¾“å…¥çš„æ–‡ä»¶å®¹å™¨æ ¼å¼ï¼Œè¿”å›è¯†åˆ«å‡ºæ¥çš„æ–‡ä»¶æ ¼å¼ã€‚å¦‚æœæ²¡æœ‰è¯†åˆ«å‡ºæ¥ï¼Œå°±è¿”å›åˆå§‹å€¼NULLã€‚
 AVInputFormat *av_probe_input_format(AVProbeData *pd, int is_opened)
 {
     AVInputFormat *fmt1, *fmt;
-    // score£¬score_max ¿ÉÒÔÀí½âÊ¶±ğÎÄ¼şÈİÆ÷¸ñÊ½µÄÕıÈ·¼¶±ğ¡£
-    // ÎÄ¼şÈİÆ÷¸ñÊ½Ê¶±ğ½á¹û£¬Èç¹ûÍêÈ«ÕıÈ·¿ÉÒÔÉè¶¨Îª100£¬Èç¹û¿ÉÄÜÕıÈ·¿ÉÒÔÉè¶¨Îª50£¬Ã»Ê¶±ğ³öÀ´Éè¶¨Îª0¡£Ê¶±ğ·½·¨²»Í¬µ¼ÖÂµÈ¼¶²»Í¬¡£
+    // scoreï¼Œscore_max å¯ä»¥ç†è§£è¯†åˆ«æ–‡ä»¶å®¹å™¨æ ¼å¼çš„æ­£ç¡®çº§åˆ«ã€‚
+    // æ–‡ä»¶å®¹å™¨æ ¼å¼è¯†åˆ«ç»“æœï¼Œå¦‚æœå®Œå…¨æ­£ç¡®å¯ä»¥è®¾å®šä¸º100ï¼Œå¦‚æœå¯èƒ½æ­£ç¡®å¯ä»¥è®¾å®šä¸º50ï¼Œæ²¡è¯†åˆ«å‡ºæ¥è®¾å®šä¸º0ã€‚è¯†åˆ«æ–¹æ³•ä¸åŒå¯¼è‡´ç­‰çº§ä¸åŒã€‚
     int score, score_max;
 
     fmt = NULL;
@@ -78,16 +78,16 @@ AVInputFormat *av_probe_input_format(AVProbeData *pd, int is_opened)
 	score = 0;
 	if (fmt1->read_probe)
 	{
-	    // ¶ÁÈ¡ÎÄ¼şÍ·£¬ÅĞ¶ÏÎÄ¼şÍ·µÄÄÚÈİÀ´Ê¶±ğÎÄ¼şÈİÆ÷¸ñÊ½£¬ÕâÖÖÊ¶±ğ·½·¨·Ç³£¿É¿¿£¬Éè¶¨score Îª100¡£
+	    // è¯»å–æ–‡ä»¶å¤´ï¼Œåˆ¤æ–­æ–‡ä»¶å¤´çš„å†…å®¹æ¥è¯†åˆ«æ–‡ä»¶å®¹å™¨æ ¼å¼ï¼Œè¿™ç§è¯†åˆ«æ–¹æ³•éå¸¸å¯é ï¼Œè®¾å®šscore ä¸º100ã€‚
 	    score = fmt1->read_probe(pd);
 	}
 	else if (fmt1->extensions)
 	{
-	    // Í¨¹ıÎÄ¼şÀ©Õ¹ÃûÀ´Ê¶±ğÎÄ¼şÈİÆ÷¸ñÊ½£¬ÒòÎªÎÄ¼şÀ©Õ¹ÃûÈÎºÎÈË¶¼¿ÉÒÔ¸Ä£¬Èç¹û¸Ä±äÀ©Õ¹Ãû£¬ÕâÖÖ·½·¨¾Í´íÎó£¬Èç¹û²»¸Ä±äÀ©Õ¹Ãû£¬ÕâÖÖÊ¶±ğ·½·¨ÓĞµã¿É¿¿£¬×ÛºÏµÈ¼¶Îª50¡£
+	    // é€šè¿‡æ–‡ä»¶æ‰©å±•åæ¥è¯†åˆ«æ–‡ä»¶å®¹å™¨æ ¼å¼ï¼Œå› ä¸ºæ–‡ä»¶æ‰©å±•åä»»ä½•äººéƒ½å¯ä»¥æ”¹ï¼Œå¦‚æœæ”¹å˜æ‰©å±•åï¼Œè¿™ç§æ–¹æ³•å°±é”™è¯¯ï¼Œå¦‚æœä¸æ”¹å˜æ‰©å±•åï¼Œè¿™ç§è¯†åˆ«æ–¹æ³•æœ‰ç‚¹å¯é ï¼Œç»¼åˆç­‰çº§ä¸º50ã€‚
 	    if (match_ext(pd->filename, fmt1->extensions))
 		score = 50;
 	}
-	// Èç¹ûÊ¶±ğ³öÀ´µÄµÈ¼¶´óÓÚ×î´óÒªÇóµÄµÈ¼¶£¬¾ÍÈÏÎªÕıÈ·Ê¶±ğ£¬Ïà¹Ø²ÎÊı¸³Öµºó£¬½øÏÂÒ»¸öÑ­»·£¬×îºó·µ»Ø×î¸ß¼¶±ğ¶ÔÓ¦µÄÎÄ¼şÈİÆ÷¸ñÊ½¡£
+	// å¦‚æœè¯†åˆ«å‡ºæ¥çš„ç­‰çº§å¤§äºæœ€å¤§è¦æ±‚çš„ç­‰çº§ï¼Œå°±è®¤ä¸ºæ­£ç¡®è¯†åˆ«ï¼Œç›¸å…³å‚æ•°èµ‹å€¼åï¼Œè¿›ä¸‹ä¸€ä¸ªå¾ªç¯ï¼Œæœ€åè¿”å›æœ€é«˜çº§åˆ«å¯¹åº”çš„æ–‡ä»¶å®¹å™¨æ ¼å¼ã€‚
 	if (score > score_max)
 	{
 	    score_max = score;
@@ -97,7 +97,7 @@ AVInputFormat *av_probe_input_format(AVProbeData *pd, int is_opened)
     return fmt;
 }
 
-// ´ò¿ªÊäÈëÁ÷£¬ÆäÖĞAVFormatParameters *ap ²ÎÊıÔÚÊİÉíºóµÄffplay ÖĞÃ»ÓĞÓÃµ½£¬±£ÁôÎªÁË²»¸Ä±ä½Ó¿Ú
+// æ‰“å¼€è¾“å…¥æµï¼Œå…¶ä¸­AVFormatParameters *ap å‚æ•°åœ¨ç˜¦èº«åçš„ffplay ä¸­æ²¡æœ‰ç”¨åˆ°ï¼Œä¿ç•™ä¸ºäº†ä¸æ”¹å˜æ¥å£
 int av_open_input_stream(AVFormatContext **ic_ptr, ByteIOContext *pb, const char *filename,
     AVInputFormat *fmt, AVFormatParameters *ap)
 {
@@ -110,22 +110,22 @@ int av_open_input_stream(AVFormatContext **ic_ptr, ByteIOContext *pb, const char
 	ap = &default_ap;
 	memset(ap, 0, sizeof(default_ap));
     }
-    //·ÖÅäAVFormatContext ÄÚ´æ£¬²¿·Ö³ÉÔ±±äÁ¿ÔÚ½ÓÏÂÀ´µÄ³ÌĞò´úÂëÖĞ¸³Öµ£¬²¿·Ö³ÉÔ±±äÁ¿ÔÚÏÂÃæµ÷ÓÃµÄic->iformat->read_header(ic, ap)º¯ÊıÖĞ¸³Öµ¡£
+    //åˆ†é…AVFormatContext å†…å­˜ï¼Œéƒ¨åˆ†æˆå‘˜å˜é‡åœ¨æ¥ä¸‹æ¥çš„ç¨‹åºä»£ç ä¸­èµ‹å€¼ï¼Œéƒ¨åˆ†æˆå‘˜å˜é‡åœ¨ä¸‹é¢è°ƒç”¨çš„ic->iformat->read_header(ic, ap)å‡½æ•°ä¸­èµ‹å€¼ã€‚
     ic = av_mallocz(sizeof(AVFormatContext));
     if (!ic)
     {
 	err = AVERROR_NOMEM;
 	goto fail;
     }
-    // ¹ØÁªAVFormatContextºÍAVInputFormat
+    // å…³è”AVFormatContextå’ŒAVInputFormat
     ic->iformat = fmt;
-    // ¹ØÁªAVFormatContextºÍ¹ãÒåÎÄ¼şByteIOContext
+    // å…³è”AVFormatContextå’Œå¹¿ä¹‰æ–‡ä»¶ByteIOContext
     if (pb)
 	ic->pb = *pb;
 
     if (fmt->priv_data_size > 0)
     {
-	// ·ÖÅäpriv_data Ö¸ÏòµÄÄÚ´æ¡£
+	// åˆ†é…priv_data æŒ‡å‘çš„å†…å­˜ã€‚
 	ic->priv_data = av_mallocz(fmt->priv_data_size);
 	if (!ic->priv_data)
 	{
@@ -137,7 +137,7 @@ int av_open_input_stream(AVFormatContext **ic_ptr, ByteIOContext *pb, const char
     {
 	ic->priv_data = NULL;
     }
-    // ¶ÁÈ¡ÎÄ¼şÍ·£¬Ê¶±ğÃ½ÌåÁ÷¸ñÊ½¡£
+    // è¯»å–æ–‡ä»¶å¤´ï¼Œè¯†åˆ«åª’ä½“æµæ ¼å¼ã€‚
     err = ic->iformat->read_header(ic, ap);
     if (err < 0)
 	goto fail;
@@ -145,7 +145,7 @@ int av_open_input_stream(AVFormatContext **ic_ptr, ByteIOContext *pb, const char
     *ic_ptr = ic;
     return 0;
 
-    // ¼òµ¥³£¹æµÄ´íÎó´¦Àí¡£
+    // ç®€å•å¸¸è§„çš„é”™è¯¯å¤„ç†ã€‚
 fail:
     if (ic)
 	av_freep(&ic->priv_data);
@@ -155,7 +155,7 @@ fail:
     return err;
 }
 
-// ´ò¿ªÊäÈëÎÄ¼ş£¬²¢Ê¶±ğÎÄ¼ş¸ñÊ½£¬È»ºóµ÷ÓÃº¯ÊıÊ¶±ğÃ½ÌåÁ÷¸ñÊ½¡£
+// æ‰“å¼€è¾“å…¥æ–‡ä»¶ï¼Œå¹¶è¯†åˆ«æ–‡ä»¶æ ¼å¼ï¼Œç„¶åè°ƒç”¨å‡½æ•°è¯†åˆ«åª’ä½“æµæ ¼å¼ã€‚
 int av_open_input_file(AVFormatContext **ic_ptr, const char *filename, AVInputFormat *fmt,
     int buf_size, AVFormatParameters *ap)
 {
@@ -174,30 +174,30 @@ int av_open_input_file(AVFormatContext **ic_ptr, const char *filename, AVInputFo
 
     if (!fmt || must_open_file)
     {
-	// ´ò¿ªÊäÈëÎÄ¼ş£¬¹ØÁªByteIOContext£¬¾­¹ıÌø×ª¼¸´Îºó²ÅÊµÖÊµ÷ÓÃÎÄ¼şÏµÍ³open()º¯ÊıÊµÖÊ´ò¿ªÎÄ¼ş¡£
+	// æ‰“å¼€è¾“å…¥æ–‡ä»¶ï¼Œå…³è”ByteIOContextï¼Œç»è¿‡è·³è½¬å‡ æ¬¡åæ‰å®è´¨è°ƒç”¨æ–‡ä»¶ç³»ç»Ÿopen()å‡½æ•°å®è´¨æ‰“å¼€æ–‡ä»¶ã€‚
 	if (url_fopen(pb, filename, URL_RDONLY) < 0)
 	{
 	    err = AVERROR_IO;
 	    goto fail;
 	}
 	file_opened = 1;
-	// Èç¹û³ÌĞòÖ¸¶¨ByteIOContext ÄÚ²¿Ê¹ÓÃµÄ»º´æ´óĞ¡£¬¾ÍÖØĞÂÉèÖÃÄÚ²¿»º´æ´óĞ¡¡£Í¨³£²»Ö¸¶¨´óĞ¡¡£
+	// å¦‚æœç¨‹åºæŒ‡å®šByteIOContext å†…éƒ¨ä½¿ç”¨çš„ç¼“å­˜å¤§å°ï¼Œå°±é‡æ–°è®¾ç½®å†…éƒ¨ç¼“å­˜å¤§å°ã€‚é€šå¸¸ä¸æŒ‡å®šå¤§å°ã€‚
 	if (buf_size > 0)
 	    url_setbufsize(pb, buf_size);
 
-	// ÏÈ¶ÁPROBE_BUF_MIN(2048)×Ö½ÚÎÄ¼ş¿ªÊ¼Êı¾İÊ¶±ğÎÄ¼ş¸ñÊ½£¬
-	// Èç¹û²»ÄÜÊ¶±ğÎÄ¼ş¸ñÊ½£¬¾Í°ÑÊ¶±ğÎÄ¼ş»º´æÒÔ2 ±¶µÄÔö³¤À©´óÔÙ¶ÁÎÄ¼ş¿ªÊ¼Êı¾İÊ¶±ğ£¬Ö±µ½Ê¶±ğ³öÎÄ¼ş¸ñÊ½»òÕß³¬¹ı131072 ×Ö½Ú»º´æ¡£
+	// å…ˆè¯»PROBE_BUF_MIN(2048)å­—èŠ‚æ–‡ä»¶å¼€å§‹æ•°æ®è¯†åˆ«æ–‡ä»¶æ ¼å¼ï¼Œ
+	// å¦‚æœä¸èƒ½è¯†åˆ«æ–‡ä»¶æ ¼å¼ï¼Œå°±æŠŠè¯†åˆ«æ–‡ä»¶ç¼“å­˜ä»¥2 å€çš„å¢é•¿æ‰©å¤§å†è¯»æ–‡ä»¶å¼€å§‹æ•°æ®è¯†åˆ«ï¼Œç›´åˆ°è¯†åˆ«å‡ºæ–‡ä»¶æ ¼å¼æˆ–è€…è¶…è¿‡131072 å­—èŠ‚ç¼“å­˜ã€‚
 	for (probe_size = PROBE_BUF_MIN; probe_size <= PROBE_BUF_MAX && !fmt; probe_size <<= 1)
 	{
-	    // ÖØĞÂ·ÖÅä»º´æ£¬ÖØĞÂ¶ÁÎÄ¼ş¿ªÊ¼Êı¾İ¡£
+	    // é‡æ–°åˆ†é…ç¼“å­˜ï¼Œé‡æ–°è¯»æ–‡ä»¶å¼€å§‹æ•°æ®ã€‚
 	    pd->buf = av_realloc(pd->buf, probe_size);
 	    pd->buf_size = url_fread(pb, pd->buf, probe_size);
-	    // °ÑÎÄ¼ş¶ÁÖ¸Õëseek µ½ÎÄ¼ş¿ªÊ¼´¦£¬±ãÓÚÏÂÒ»´Î¶Á¡£
+	    // æŠŠæ–‡ä»¶è¯»æŒ‡é’ˆseek åˆ°æ–‡ä»¶å¼€å§‹å¤„ï¼Œä¾¿äºä¸‹ä¸€æ¬¡è¯»ã€‚
 	    if (url_fseek(pb, 0, SEEK_SET) == (offset_t)-EPIPE)
 	    {
-		// Èç¹ûseek´íÎó£¬¹Ø±ÕÎÄ¼ş£¬ÔÙÖØĞÂ´ò¿ª¡£
+		// å¦‚æœseeké”™è¯¯ï¼Œå…³é—­æ–‡ä»¶ï¼Œå†é‡æ–°æ‰“å¼€ã€‚
 		url_fclose(pb);
-		// ÖØĞÂ´ò¿ªÎÄ¼ş³ö´í£¬ÉèÖÃ´íÎóÂë£¬Ìøµ½´íÎó´¦Àí¡£
+		// é‡æ–°æ‰“å¼€æ–‡ä»¶å‡ºé”™ï¼Œè®¾ç½®é”™è¯¯ç ï¼Œè·³åˆ°é”™è¯¯å¤„ç†ã€‚
 		if (url_fopen(pb, filename, URL_RDONLY) < 0)
 		{
 		    file_opened = 0;
@@ -206,7 +206,7 @@ int av_open_input_file(AVFormatContext **ic_ptr, const char *filename, AVInputFo
 		}
 	    }
 
-	    // ÖØĞÂÊ¶±ğÎÄ¼ş¸ñÊ½£¬ÒòÎªÒ»´Î±ÈÒ»´ÎÊı¾İ¶à£¬Êı¾İÉÙµÄÊ±ºò¿ÉÄÜÊ¶±ğ²»³ö£¬Êı¾İ¶àÁË¿ÉÄÜ¾Í¿ÉÒÔÁË¡£
+	    // é‡æ–°è¯†åˆ«æ–‡ä»¶æ ¼å¼ï¼Œå› ä¸ºä¸€æ¬¡æ¯”ä¸€æ¬¡æ•°æ®å¤šï¼Œæ•°æ®å°‘çš„æ—¶å€™å¯èƒ½è¯†åˆ«ä¸å‡ºï¼Œæ•°æ®å¤šäº†å¯èƒ½å°±å¯ä»¥äº†ã€‚
 	    fmt = av_probe_input_format(pd, 1);
 	}
 	av_freep(&pd->buf);
@@ -218,14 +218,14 @@ int av_open_input_file(AVFormatContext **ic_ptr, const char *filename, AVInputFo
 	goto fail;
     }
 
-    // Ê¶±ğ³öÎÄ¼ş¸ñÊ½ºó£¬µ÷ÓÃº¯ÊıÊ¶±ğÁ÷av_open_input_stream ¸ñÊ½¡£
+    // è¯†åˆ«å‡ºæ–‡ä»¶æ ¼å¼åï¼Œè°ƒç”¨å‡½æ•°è¯†åˆ«æµav_open_input_stream æ ¼å¼ã€‚
     err = av_open_input_stream(ic_ptr, pb, filename, fmt, ap);
     if (err)
 	goto fail;
     return 0;
 
 fail:
-    // ¼òµ¥µÄÒì³£´íÎó´¦Àí¡£
+    // ç®€å•çš„å¼‚å¸¸é”™è¯¯å¤„ç†ã€‚
     av_freep(&pd->buf);
     if (file_opened)
 	url_fclose(pb);
@@ -233,19 +233,19 @@ fail:
     return err;
 }
 
-// Ò»´Î¶ÁÈ¡Ò»¸öÊı¾İ°ü£¬ÔÚÊİÉíºóµÄffplay ÖĞ£¬Ò»´Î¶ÁÈ¡Ò»¸öÍêÕûµÄÊı¾İÖ¡£¬Êı¾İ°ü¡£
+// ä¸€æ¬¡è¯»å–ä¸€ä¸ªæ•°æ®åŒ…ï¼Œåœ¨ç˜¦èº«åçš„ffplay ä¸­ï¼Œä¸€æ¬¡è¯»å–ä¸€ä¸ªå®Œæ•´çš„æ•°æ®å¸§ï¼Œæ•°æ®åŒ…ã€‚
 int av_read_packet(AVFormatContext *s, AVPacket *pkt)
 {
     return s->iformat->read_packet(s, pkt);
 }
 
-// Ìí¼ÓË÷Òıµ½Ë÷Òı±í¡£ÓĞĞ©Ã½ÌåÎÄ¼şÎª±ãÓÚseek£¬ÓĞÒôÊÓÆµÊı¾İÖ¡ÓĞË÷Òı£¬ffplay °ÑÕâĞ©Ë÷ÒıÒÔÊ±¼äÅÅĞò·Åµ½Ò»¸öÊı¾İÖĞ¡£·µ»ØÖµÌí¼ÓÏîµÄË÷Òı¡£
+// æ·»åŠ ç´¢å¼•åˆ°ç´¢å¼•è¡¨ã€‚æœ‰äº›åª’ä½“æ–‡ä»¶ä¸ºä¾¿äºseekï¼Œæœ‰éŸ³è§†é¢‘æ•°æ®å¸§æœ‰ç´¢å¼•ï¼Œffplay æŠŠè¿™äº›ç´¢å¼•ä»¥æ—¶é—´æ’åºæ”¾åˆ°ä¸€ä¸ªæ•°æ®ä¸­ã€‚è¿”å›å€¼æ·»åŠ é¡¹çš„ç´¢å¼•ã€‚
 int av_add_index_entry(AVStream *st, int64_t pos, int64_t timestamp, int size, int distance, int flags)
 {
     AVIndexEntry *entries, *ie;
     int index;
 
-    if ((unsigned)st->nb_index_entries + 1 >= UINT_MAX / sizeof(AVIndexEntry)) // Ô½½çÅĞ¶Ï
+    if ((unsigned)st->nb_index_entries + 1 >= UINT_MAX / sizeof(AVIndexEntry)) // è¶Šç•Œåˆ¤æ–­
 	return  -1;
 
     entries = av_fast_realloc(st->index_entries, &st->index_entries_allocated_size,
@@ -257,13 +257,13 @@ int av_add_index_entry(AVStream *st, int64_t pos, int64_t timestamp, int size, i
 
     index = av_index_search_timestamp(st, timestamp, AVSEEK_FLAG_ANY);
 
-    if (index < 0)	// ºóĞø
+    if (index < 0)	// åç»­
     {
 	index = st->nb_index_entries++;
 	ie = &entries[index];
 	assert(index == 0 || ie[-1].timestamp < timestamp);
     }
-    else			// ÖĞ²å
+    else			// ä¸­æ’
     {
 	ie = &entries[index];
 	if (ie->timestamp != timestamp)
@@ -296,7 +296,7 @@ int av_index_search_timestamp(AVStream *st, int64_t wanted_timestamp, int flags)
     a = -1;
     b = nb_entries;
 
-    while (b - a > 1) //²¢Ã»ÓĞ¼ÇÂ¼idxÖµ£¬²ÉÓÃµÄÊÇÕÛ°ë²éÕÒ
+    while (b - a > 1) //å¹¶æ²¡æœ‰è®°å½•idxå€¼ï¼Œé‡‡ç”¨çš„æ˜¯æŠ˜åŠæŸ¥æ‰¾
     {
 	m = (a + b) >> 1;
 	timestamp = entries[m].timestamp;
@@ -322,7 +322,7 @@ int av_index_search_timestamp(AVStream *st, int64_t wanted_timestamp, int flags)
     return m;
 }
 
-// ¹Ø±ÕÊäÈëÃ½ÌåÎÄ¼ş£¬Ò»´ó¶ÑµÄ¹Ø±ÕÊÍ·Å²Ù×÷¡£
+// å…³é—­è¾“å…¥åª’ä½“æ–‡ä»¶ï¼Œä¸€å¤§å †çš„å…³é—­é‡Šæ”¾æ“ä½œã€‚
 void av_close_input_file(AVFormatContext *s)
 {
     int i;
@@ -344,7 +344,7 @@ void av_close_input_file(AVFormatContext *s)
     av_freep(&s->priv_data);
     av_free(s);
 }
-// new Ò»¸öĞÂµÄÃ½ÌåÁ÷£¬·µ»ØAVStream Ö¸Õë
+// new ä¸€ä¸ªæ–°çš„åª’ä½“æµï¼Œè¿”å›AVStream æŒ‡é’ˆ
 AVStream *av_new_stream(AVFormatContext *s, int id)
 {
     AVStream *st;
@@ -362,7 +362,7 @@ AVStream *av_new_stream(AVFormatContext *s, int id)
     return st;
 }
 
-// ÉèÖÃ¼ÆËãpts Ê±ÖÓµÄÏà¹Ø²ÎÊı¡£
+// è®¾ç½®è®¡ç®—pts æ—¶é’Ÿçš„ç›¸å…³å‚æ•°ã€‚
 void av_set_pts_info(AVStream *s, int pts_wrap_bits, int pts_num, int pts_den)
 {
     s->time_base.num = pts_num;

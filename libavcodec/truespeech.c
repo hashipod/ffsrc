@@ -3,7 +3,7 @@
 #include "truespeech_data.h"
 
 // TrueSpeech decoder context
-// ´ËÎÄ¼şÊµÏÖtrue speed ÒôÆµ½âÂëÆ÷
+// æ­¤æ–‡ä»¶å®ç°true speed éŸ³é¢‘è§£ç å™¨
 typedef struct TSContext
 {
     // input data

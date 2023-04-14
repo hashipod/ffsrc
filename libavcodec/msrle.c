@@ -6,7 +6,7 @@
 #include "avcodec.h"
 #include "dsputil.h"
 
-// 此文件实现微软行程长度压缩算法解码器
+// 姝ゆ枃浠跺疄鐜板井杞绋嬮暱搴﹀帇缂╃畻娉曡В鐮佸櫒
 
 #define FF_BUFFER_HINTS_VALID    0x01 // Buffer hints value is meaningful (if 0 ignore)
 #define FF_BUFFER_HINTS_READABLE 0x02 // Codec will read from buffer

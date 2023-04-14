@@ -2,7 +2,7 @@
 #include "avcodec.h"
 #include "dsputil.h"
 
-// ±à½âÂë¿âÊ¹ÓÃµÄ°ïÖúºÍ¹¤¾ßº¯Êı
+// ç¼–è§£ç åº“ä½¿ç”¨çš„å¸®åŠ©å’Œå·¥å…·å‡½æ•°
 #define EDGE_WIDTH   16
 #define STRIDE_ALIGN 16
 
@@ -10,7 +10,7 @@
 
 #define FFMAX(a,b) ((a) > (b) ? (a) : (b))
 
-// ÄÚ´æ¶¯Ì¬·ÖÅäº¯Êı£¬×öÒ»ÏÂ¼òµ¥²ÎÊıĞ£Ñéºóµ÷ÓÃÏµÍ³º¯Êı
+// å†…å­˜åŠ¨æ€åˆ†é…å‡½æ•°ï¼Œåšä¸€ä¸‹ç®€å•å‚æ•°æ ¡éªŒåè°ƒç”¨ç³»ç»Ÿå‡½æ•°
 void *av_malloc(unsigned int size)
 {
     void *ptr;
@@ -21,7 +21,7 @@ void *av_malloc(unsigned int size)
 
     return ptr;
 }
-// ÄÚ´æ¶¯Ì¬ÖØ·ÖÅäº¯Êı£¬×öÒ»ÏÂ¼òµ¥²ÎÊıĞ£Ñéºóµ÷ÓÃÏµÍ³º¯Êı
+// å†…å­˜åŠ¨æ€é‡åˆ†é…å‡½æ•°ï¼Œåšä¸€ä¸‹ç®€å•å‚æ•°æ ¡éªŒåè°ƒç”¨ç³»ç»Ÿå‡½æ•°
 void *av_realloc(void *ptr, unsigned int size)
 {
     if (size > INT_MAX)
@@ -29,13 +29,13 @@ void *av_realloc(void *ptr, unsigned int size)
 
     return realloc(ptr, size);
 }
-// ÄÚ´æ¶¯Ì¬ÊÍ·Åº¯Êı£¬×öÒ»ÏÂ¼òµ¥²ÎÊıĞ£Ñéºóµ÷ÓÃÏµÍ³º¯Êı
+// å†…å­˜åŠ¨æ€é‡Šæ”¾å‡½æ•°ï¼Œåšä¸€ä¸‹ç®€å•å‚æ•°æ ¡éªŒåè°ƒç”¨ç³»ç»Ÿå‡½æ•°
 void av_free(void *ptr)
 {
     if (ptr)
 	free(ptr);
 }
-// ÄÚ´æ¶¯Ì¬·ÖÅäº¯Êı£¬¸´ÓÃav_malloc()º¯Êı£¬ÔÙ°Ñ·ÖÅäµÄÄÚ´æÇå0
+// å†…å­˜åŠ¨æ€åˆ†é…å‡½æ•°ï¼Œå¤ç”¨av_malloc()å‡½æ•°ï¼Œå†æŠŠåˆ†é…çš„å†…å­˜æ¸…0
 void *av_mallocz(unsigned int size)
 {
     void *ptr;
@@ -47,7 +47,7 @@ void *av_mallocz(unsigned int size)
     memset(ptr, 0, size);
     return ptr;
 }
-// ¿ìËÙÄÚ´æ¶¯Ì¬·ÖÅäº¯Êı£¬Ô¤·ÖÅäÒ»Ğ©ÄÚ´æÀ´±ÜÃâ¶à´Îµ÷ÓÃÏµÍ³º¯Êı´ïµ½¿ìËÙµÄÄ¿µÄ
+// å¿«é€Ÿå†…å­˜åŠ¨æ€åˆ†é…å‡½æ•°ï¼Œé¢„åˆ†é…ä¸€äº›å†…å­˜æ¥é¿å…å¤šæ¬¡è°ƒç”¨ç³»ç»Ÿå‡½æ•°è¾¾åˆ°å¿«é€Ÿçš„ç›®çš„
 void *av_fast_realloc(void *ptr, unsigned int *size, unsigned int min_size)
 {
     if (min_size < *size)
@@ -57,7 +57,7 @@ void *av_fast_realloc(void *ptr, unsigned int *size, unsigned int min_size)
 
     return av_realloc(ptr, *size);
 }
-// ¶¯Ì¬ÄÚ´æÊÍ·Åº¯Êı£¬×¢Òâ´«ÈëµÄ±äÁ¿µÄÀàĞÍ¡£
+// åŠ¨æ€å†…å­˜é‡Šæ”¾å‡½æ•°ï¼Œæ³¨æ„ä¼ å…¥çš„å˜é‡çš„ç±»å‹ã€‚
 void av_freep(void *arg)
 {
     void **ptr = (void **)arg;
@@ -67,7 +67,7 @@ void av_freep(void *arg)
 
 AVCodec *first_avcodec = NULL;
 
-// °Ñ±à½âÂëÆ÷´®Áª³ÉÒ»¸öÁ´±í£¬±ãÓÚ²éÕÒ¡£
+// æŠŠç¼–è§£ç å™¨ä¸²è”æˆä¸€ä¸ªé“¾è¡¨ï¼Œä¾¿äºæŸ¥æ‰¾ã€‚
 void register_avcodec(AVCodec *format)
 {
     AVCodec **p;
@@ -77,7 +77,7 @@ void register_avcodec(AVCodec *format)
     *p = format;
     format->next = NULL;
 }
-// ±à½âÂë¿âÄÚ²¿Ê¹ÓÃµÄ»º´æÇø£¬ÒòÎªÊÓÆµÍ¼ÏñÓĞRGB »òYUV ·ÖÁ¿¸ñÊ½£¬ËùÒÔÃ¿¸öÊı×éÓĞËÄ¸ö·ÖÁ¿¡£
+// ç¼–è§£ç åº“å†…éƒ¨ä½¿ç”¨çš„ç¼“å­˜åŒºï¼Œå› ä¸ºè§†é¢‘å›¾åƒæœ‰RGB æˆ–YUV åˆ†é‡æ ¼å¼ï¼Œæ‰€ä»¥æ¯ä¸ªæ•°ç»„æœ‰å››ä¸ªåˆ†é‡ã€‚
 typedef struct InternalBuffer
 {
     uint8_t *base[4];
@@ -88,10 +88,10 @@ typedef struct InternalBuffer
 #define INTERNAL_BUFFER_SIZE 32
 
 #define ALIGN(x, a) (((x)+(a)-1)&~((a)-1))
-// ¼ÆËã¸÷ÖÖÍ¼Ïñ¸ñÊ½ÒªÇóµÄÍ¼Ïñ³¤¿íµÄ×Ö½Ú¶ÔÆëÊı£¬ÊÇ1 ¸ö»¹ÊÇ2 ¸ö£¬4 ¸ö£¬8 ¸ö£¬16 ¸ö×Ö½Ú¶ÔÆë¡£
+// è®¡ç®—å„ç§å›¾åƒæ ¼å¼è¦æ±‚çš„å›¾åƒé•¿å®½çš„å­—èŠ‚å¯¹é½æ•°ï¼Œæ˜¯1 ä¸ªè¿˜æ˜¯2 ä¸ªï¼Œ4 ä¸ªï¼Œ8 ä¸ªï¼Œ16 ä¸ªå­—èŠ‚å¯¹é½ã€‚
 void avcodec_align_dimensions(AVCodecContext *s, int *width, int *height)
 {
-    // Ä¬ÈÏ³¤¿íÊÇ1 ¸ö×Ö½Ú¶ÔÆë¡£
+    // é»˜è®¤é•¿å®½æ˜¯1 ä¸ªå­—èŠ‚å¯¹é½ã€‚
     int w_align = 1;
     int h_align = 1;
 
@@ -129,7 +129,7 @@ void avcodec_align_dimensions(AVCodecContext *s, int *width, int *height)
     *width = ALIGN(*width, w_align);
     *height = ALIGN(*height, h_align);
 }
-// Ğ£ÑéÊÓÆµÍ¼ÏñµÄ³¤¿íÊÇ·ñºÏ·¨¡£
+// æ ¡éªŒè§†é¢‘å›¾åƒçš„é•¿å®½æ˜¯å¦åˆæ³•ã€‚
 int avcodec_check_dimensions(void *av_log_ctx, unsigned int w, unsigned int h)
 {
     if ((int)w > 0 && (int)h > 0 && (w + 128)*(uint64_t)(h + 128) < INT_MAX / 4)
@@ -137,8 +137,8 @@ int avcodec_check_dimensions(void *av_log_ctx, unsigned int w, unsigned int h)
 
     return  -1;
 }
-// Ã¿´ÎÈ¡internal_buffer_count Êı¾İÏî£¬ÓÃbase[0]À´ÅĞ¶ÏÊÇ·ñÒÑ·ÖÅäÄÚ´æ£¬ÓÃdata[0]À´ÅĞ¶ÏÊÇ·ñÒÑ±»Õ¼ÓÃ¡£base[]ºÍdata[]ÓĞ¶àÖØÒâÒå¡£
-// ÔÚavcodec_alloc_context ÖĞÒÑ°Ñinternal_buffer ¸÷ÏîÇå0£¬ËùÒÔ¿ÉÒÔÓÃbase[0]À´ÅĞ¶Ï¡£
+// æ¯æ¬¡å–internal_buffer_count æ•°æ®é¡¹ï¼Œç”¨base[0]æ¥åˆ¤æ–­æ˜¯å¦å·²åˆ†é…å†…å­˜ï¼Œç”¨data[0]æ¥åˆ¤æ–­æ˜¯å¦å·²è¢«å ç”¨ã€‚base[]å’Œdata[]æœ‰å¤šé‡æ„ä¹‰ã€‚
+// åœ¨avcodec_alloc_context ä¸­å·²æŠŠinternal_buffer å„é¡¹æ¸…0ï¼Œæ‰€ä»¥å¯ä»¥ç”¨base[0]æ¥åˆ¤æ–­ã€‚
 int avcodec_default_get_buffer(AVCodecContext *s, AVFrame *pic)
 {
     int i;
@@ -149,36 +149,36 @@ int avcodec_default_get_buffer(AVCodecContext *s, AVFrame *pic)
 
     assert(pic->data[0] == NULL);
     assert(INTERNAL_BUFFER_SIZE > s->internal_buffer_count);
-    // Ğ£ÑéÊÓÆµÍ¼ÏñµÄ³¤¿íÊÇ·ñºÏ·¨¡£
+    // æ ¡éªŒè§†é¢‘å›¾åƒçš„é•¿å®½æ˜¯å¦åˆæ³•ã€‚
     if (avcodec_check_dimensions(s, w, h))
 	return  -1;
-    // Èç¹ûÃ»ÓĞ·ÖÅäÄÚ´æ£¬¾Í·ÖÅä¶¯Ì¬ÄÚ´æ²¢Çå0¡£
+    // å¦‚æœæ²¡æœ‰åˆ†é…å†…å­˜ï¼Œå°±åˆ†é…åŠ¨æ€å†…å­˜å¹¶æ¸…0ã€‚
     if (s->internal_buffer == NULL)
 	s->internal_buffer = av_mallocz(INTERNAL_BUFFER_SIZE * sizeof(InternalBuffer));
-    // È¡»º´æÖĞµÄµÚÒ»¸öÃ»ÓĞÕ¼ÓÃÄÚ´æ¡£
+    // å–ç¼“å­˜ä¸­çš„ç¬¬ä¸€ä¸ªæ²¡æœ‰å ç”¨å†…å­˜ã€‚
     buf = &((InternalBuffer*)s->internal_buffer)[s->internal_buffer_count];
 
     if (buf->base[0])
     {
-	// Èç¹ûÄÚ´æÒÑ·ÖÅä¾ÍÌø¹ı
+	// å¦‚æœå†…å­˜å·²åˆ†é…å°±è·³è¿‡
     }
     else
     {
-	// Èç¹ûÃ»ÓĞ·ÖÅäÄÚ´æ¾Í°´ÕÕÍ¼Ïñ¸ñÊ½ÒªÇó·ÖÅäÄÚ´æ£¬²¢ÉèÖÃÒ»Ğ©±ê¼ÇºÍ¼ÆËãÒ»Ğ©²ÎÊıÖµ¡£
+	// å¦‚æœæ²¡æœ‰åˆ†é…å†…å­˜å°±æŒ‰ç…§å›¾åƒæ ¼å¼è¦æ±‚åˆ†é…å†…å­˜ï¼Œå¹¶è®¾ç½®ä¸€äº›æ ‡è®°å’Œè®¡ç®—ä¸€äº›å‚æ•°å€¼ã€‚
 	int h_chroma_shift, v_chroma_shift;
 	int pixel_size, size[3];
 
 
 	AVPicture picture;
-	// ¼ÆËãCbCr É«¶È·ÖÁ¿³¤¿íµÄÓëY ÁÁ¶È·ÖÁ¿³¤¿íµÄ±È£¬×îºóÓÃÒÆÎ»ÊµÏÖ¡£
+	// è®¡ç®—CbCr è‰²åº¦åˆ†é‡é•¿å®½çš„ä¸Y äº®åº¦åˆ†é‡é•¿å®½çš„æ¯”ï¼Œæœ€åç”¨ç§»ä½å®ç°ã€‚
 	avcodec_get_chroma_sub_sample(s->pix_fmt, &h_chroma_shift, &v_chroma_shift);
-	// ¹æÕû³¤¿íÂú×ãÌØ¶¨Í¼ÏñÏñËØ¸ñÊ½µÄÒªÇó¡£
+	// è§„æ•´é•¿å®½æ»¡è¶³ç‰¹å®šå›¾åƒåƒç´ æ ¼å¼çš„è¦æ±‚ã€‚
 	avcodec_align_dimensions(s, &w, &h);
 
-	// °Ñ³¤¿í·Å´óÒ»Ğ©£¬±ÈÈçÔÚmpeg4 ÊÓÆµÖĞ±àÂëËã·¨ÖĞµÄÔË¶¯¹À¼ÆÒª°ÑÔ­Ê¼Í¼Ïñ×öÀ©Õ¹À´Âú×ã²»ÊÜÏŞÖÆÔË¶¯Ê¸Á¿µÄÒªÇó(ÔË¶¯Ê¸Á¿¿ÉÒÔ³¬³öÔ­Ê¼Í¼Ïñ±ß½ç)¡£
+	// æŠŠé•¿å®½æ”¾å¤§ä¸€äº›ï¼Œæ¯”å¦‚åœ¨mpeg4 è§†é¢‘ä¸­ç¼–ç ç®—æ³•ä¸­çš„è¿åŠ¨ä¼°è®¡è¦æŠŠåŸå§‹å›¾åƒåšæ‰©å±•æ¥æ»¡è¶³ä¸å—é™åˆ¶è¿åŠ¨çŸ¢é‡çš„è¦æ±‚(è¿åŠ¨çŸ¢é‡å¯ä»¥è¶…å‡ºåŸå§‹å›¾åƒè¾¹ç•Œ)ã€‚
 	w += EDGE_WIDTH * 2;
 	h += EDGE_WIDTH * 2;
-	// ¼ÆËãÌØ¶¨¸ñÊ½µÄÍ¼Ïñ²ÎÊı£¬°üÀ¨¸÷·ÖÁ¿µÄ´óĞ¡£¬µ¥ĞĞ³¤¶È(linesize/stride)µÈµÈ¡£
+	// è®¡ç®—ç‰¹å®šæ ¼å¼çš„å›¾åƒå‚æ•°ï¼ŒåŒ…æ‹¬å„åˆ†é‡çš„å¤§å°ï¼Œå•è¡Œé•¿åº¦(linesize/stride)ç­‰ç­‰ã€‚
 	avpicture_fill(&picture, NULL, s->pix_fmt, w, h);
 	pixel_size = picture.linesize[0] * 8 / w;
 	assert(pixel_size >= 1);
@@ -196,7 +196,7 @@ int avcodec_default_get_buffer(AVCodecContext *s, AVFrame *pic)
 	else
 	    size[2] = 0;
 
-	// ×¢Òâbase[]ºÍdata[]Êı×é»¹ÓĞ×÷Îª±ê¼ÇµÄÓÃÍ¾£¬free()Ê±µÄ·ÇNULL ÅĞ¶Ï£¬ÕâÀïÒªÇå0¡£
+	// æ³¨æ„base[]å’Œdata[]æ•°ç»„è¿˜æœ‰ä½œä¸ºæ ‡è®°çš„ç”¨é€”ï¼Œfree()æ—¶çš„éNULL åˆ¤æ–­ï¼Œè¿™é‡Œè¦æ¸…0ã€‚
 	memset(buf->base, 0, sizeof(buf->base));
 	memset(buf->data, 0, sizeof(buf->data));
 
@@ -206,12 +206,12 @@ int avcodec_default_get_buffer(AVCodecContext *s, AVFrame *pic)
 	    const int v_shift = i == 0 ? 0 : v_chroma_shift;
 
 	    buf->linesize[i] = picture.linesize[i];
-	    // ÊµÖÊĞÔ·ÖÅäÄÚ´æ£¬²¢ÇÒÔÚ202 ĞĞ°ÑÄÚ´æÇå0¡£
+	    // å®è´¨æ€§åˆ†é…å†…å­˜ï¼Œå¹¶ä¸”åœ¨202 è¡ŒæŠŠå†…å­˜æ¸…0ã€‚
 	    buf->base[i] = av_malloc(size[i] + 16); //FIXME 16
 	    if (buf->base[i] == NULL)
 		return  -1;
 	    memset(buf->base[i], 128, size[i]);
-	    // ÄÚ´æ¶ÔÆë¼ÆËã¡£
+	    // å†…å­˜å¯¹é½è®¡ç®—ã€‚
 	    align_off = ALIGN((buf->linesize[i] * EDGE_WIDTH >> v_shift) + (EDGE_WIDTH >> h_shift), STRIDE_ALIGN);
 
 	    if ((s->pix_fmt == PIX_FMT_PAL8) || !size[2])
@@ -223,40 +223,40 @@ int avcodec_default_get_buffer(AVCodecContext *s, AVFrame *pic)
 
     for (i = 0; i < 4; i++)
     {
-	// °Ñ·ÖÅäµÄÄÚ´æ²ÎÊı¸³Öµµ½pic Ö¸ÏòµÄ½á¹¹ÖĞ£¬´«µİ³öÈ¥¡£
+	// æŠŠåˆ†é…çš„å†…å­˜å‚æ•°èµ‹å€¼åˆ°pic æŒ‡å‘çš„ç»“æ„ä¸­ï¼Œä¼ é€’å‡ºå»ã€‚
 	pic->base[i] = buf->base[i];
 	pic->data[i] = buf->data[i];
 	pic->linesize[i] = buf->linesize[i];
     }
-    // ÄÚ´æÊı×é¼ÆÊı+1£¬×¢ÒâÊÍ·ÅÊ±µÄ²Ù×÷£¬±£Ö¤¼ÆÊı¶ÔÓ¦µÄÄÚ´æÊı×éÊÇ¿ÕÏĞµÄ¡£
+    // å†…å­˜æ•°ç»„è®¡æ•°+1ï¼Œæ³¨æ„é‡Šæ”¾æ—¶çš„æ“ä½œï¼Œä¿è¯è®¡æ•°å¯¹åº”çš„å†…å­˜æ•°ç»„æ˜¯ç©ºé—²çš„ã€‚
     s->internal_buffer_count++;
 
     return 0;
 }
 
-// ÊÍ·ÅÕ¼ÓÃµÄÄÚ´æÊı×éÏî¡£±£Ö¤´Ó0 µ½internal_buffer_count-1 Êı¾İÏîÎªÓĞĞ§Êı¾İ£¬ÆäËûÊÇ¿ÕÏĞÊı¾İÏî
+// é‡Šæ”¾å ç”¨çš„å†…å­˜æ•°ç»„é¡¹ã€‚ä¿è¯ä»0 åˆ°internal_buffer_count-1 æ•°æ®é¡¹ä¸ºæœ‰æ•ˆæ•°æ®ï¼Œå…¶ä»–æ˜¯ç©ºé—²æ•°æ®é¡¹
 void avcodec_default_release_buffer(AVCodecContext *s, AVFrame *pic)
 {
     int i;
     InternalBuffer *buf, *last, temp;
-    // ¼òµ¥µÄ²ÎÊıĞ£Ñé£¬ÄÚ´æ±ØĞëÊÇÒÑ¾­·ÖÅä¹ı¡£
+    // ç®€å•çš„å‚æ•°æ ¡éªŒï¼Œå†…å­˜å¿…é¡»æ˜¯å·²ç»åˆ†é…è¿‡ã€‚
     assert(s->internal_buffer_count);
 
     buf = NULL;
     for (i = 0; i < s->internal_buffer_count; i++)
     {
-	// ±éÀúÄÚ´æÊı×é£¬²éÕÒ¶ÔÓ¦pic µÄÄÚ´æÊı×éÏî£¬ÒÔdata[0]ÄÚ´æµØÖ·Îª±È½ÏÅĞ±ğ±ê¼Ç¡£
+	// éå†å†…å­˜æ•°ç»„ï¼ŒæŸ¥æ‰¾å¯¹åº”pic çš„å†…å­˜æ•°ç»„é¡¹ï¼Œä»¥data[0]å†…å­˜åœ°å€ä¸ºæ¯”è¾ƒåˆ¤åˆ«æ ‡è®°ã€‚
 	buf = &((InternalBuffer*)s->internal_buffer)[i]; //just 3-5 checks so is not worth to optimize
 	if (buf->data[0] == pic->data[0])
 	    break;
     }
     assert(i < s->internal_buffer_count);
-    // ÄÚ´æÊı×é¼ÆÊı-1, É¾³ı×îºóÒ»Ïî.
+    // å†…å­˜æ•°ç»„è®¡æ•°-1, åˆ é™¤æœ€åä¸€é¡¹.
     s->internal_buffer_count--;
     last = &((InternalBuffer*)s->internal_buffer)[s->internal_buffer_count];
 
-    // °Ñ½«Òª¿ÕÏĞµÄÊı×éÏîºÍÊı×é×îºóÒ»Ïî½»»»£¬±£Ö¤internal_buffer_count ¼ÆËãÕıÈ·ÎŞÎó¡£
-    // ×¢ÒâÕâÀï²¢Ã»ÓĞÄÚ´æÊÍ·ÅµÄ¶¯×÷£¬±ãÓÚÏÂ´Î¸´ÓÃÒÑ·ÖÅäµÄÄÚ´æ
+    // æŠŠå°†è¦ç©ºé—²çš„æ•°ç»„é¡¹å’Œæ•°ç»„æœ€åä¸€é¡¹äº¤æ¢ï¼Œä¿è¯internal_buffer_count è®¡ç®—æ­£ç¡®æ— è¯¯ã€‚
+    // æ³¨æ„è¿™é‡Œå¹¶æ²¡æœ‰å†…å­˜é‡Šæ”¾çš„åŠ¨ä½œï¼Œä¾¿äºä¸‹æ¬¡å¤ç”¨å·²åˆ†é…çš„å†…å­˜
     temp = *buf;
     *buf = *last;
     *last = temp;
