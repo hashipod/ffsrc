@@ -7,9 +7,9 @@ extern "C" {
 
 #include "../libavutil/avutil.h"
 
-// ¶¨Òå±à½âÂëÆ÷¿âÊ¹ÓÃµÄºê¡¢Êı¾İ½á¹¹ºÍº¯Êı£¬Í¨³£ÕâĞ©ºê¡¢Êı¾İ½á¹¹ºÍº¯ÊıÔÚ´ËÄ£¿éÄÚÏà¶ÔÈ«¾ÖÓĞĞ§¡£
+// å®šä¹‰ç¼–è§£ç å™¨åº“ä½¿ç”¨çš„å®ã€æ•°æ®ç»“æ„å’Œå‡½æ•°ï¼Œé€šå¸¸è¿™äº›å®ã€æ•°æ®ç»“æ„å’Œå‡½æ•°åœ¨æ­¤æ¨¡å—å†…ç›¸å¯¹å…¨å±€æœ‰æ•ˆã€‚
 
-// ºÍ°æ±¾ĞÅÏ¢ÓĞ¹ØµÄ¼¸¸öºê¶¨Òå
+// å’Œç‰ˆæœ¬ä¿¡æ¯æœ‰å…³çš„å‡ ä¸ªå®å®šä¹‰
 #define FFMPEG_VERSION_INT 0x000409
 #define FFMPEG_VERSION "CVS"
 
@@ -27,9 +27,9 @@ extern "C" {
 // https://github.com/feixiao/ffmpeg-2.8.11/blob/master/libavcodec/avcodec.h
 // AVCodecID
 
-// Codec ID ºê¶¨Òå£¬ÊİÉíºóµÄffplay Ö»Ö§³ÖÕâÁ½ÖÖcodec£¬ÆäËûµÄ¶¼É¾µôÁË¡£
+// Codec ID å®å®šä¹‰ï¼Œç˜¦èº«åçš„ffplay åªæ”¯æŒè¿™ä¸¤ç§codecï¼Œå…¶ä»–çš„éƒ½åˆ æ‰äº†ã€‚
 enum CodecID { CODEC_ID_TRUESPEECH, CODEC_ID_MSRLE, CODEC_ID_NONE };
-// Codec ÀàĞÍ¶¨Òå£¬ÊİÉíºóµÄffplay Ö»Ö§³ÖÊÓÆµºÍÒôÆµ¡£
+// Codec ç±»å‹å®šä¹‰ï¼Œç˜¦èº«åçš„ffplay åªæ”¯æŒè§†é¢‘å’ŒéŸ³é¢‘ã€‚
 enum CodecType {
     CODEC_TYPE_UNKNOWN = -1,
     CODEC_TYPE_VIDEO,
@@ -41,40 +41,40 @@ enum CodecType {
 
 #define FF_INPUT_BUFFER_PADDING_SIZE 8
 
-// AVPicture ºÍAVFrame Ö÷Òª±íÊ¾½âÂë¹ı³ÌÖĞµÄÊ¹ÓÃ»º´æ£¬Í¨³£Ö¡»º´æÊÇYUV ¸ñÊ½£¬
-// Êä³ö¸ñÊ½ÓĞYUV,Ò²ÓĞRGB ¸ñÊ½£¬ËùÒÔ¶¨ÒåÁË4 ¸ödata Ö¸ÕëÀ´±íÊ¾·ÖÁ¿¡£
+// AVPicture å’ŒAVFrame ä¸»è¦è¡¨ç¤ºè§£ç è¿‡ç¨‹ä¸­çš„ä½¿ç”¨ç¼“å­˜ï¼Œé€šå¸¸å¸§ç¼“å­˜æ˜¯YUV æ ¼å¼ï¼Œ
+// è¾“å‡ºæ ¼å¼æœ‰YUV,ä¹Ÿæœ‰RGB æ ¼å¼ï¼Œæ‰€ä»¥å®šä¹‰äº†4 ä¸ªdata æŒ‡é’ˆæ¥è¡¨ç¤ºåˆ†é‡ã€‚
 typedef struct AVPicture {
     uint8_t *data[4];
     int linesize[4];
 } AVPicture;
 
 typedef struct AVFrame {
-    uint8_t *data[4]; // ÓĞ¶àÖØÒâÒå£¬ÆäÒ»ÓÃNULL À´ÅĞ¶ÏÊÇ·ñ±»Õ¼ÓÃ
+    uint8_t *data[4]; // æœ‰å¤šé‡æ„ä¹‰ï¼Œå…¶ä¸€ç”¨NULL æ¥åˆ¤æ–­æ˜¯å¦è¢«å ç”¨
     int linesize[4];
-    uint8_t *base[4]; // ÓĞ¶àÖØÒâÒå£¬ÆäÒ»ÓÃNULL À´ÅĞ¶ÏÊÇ·ñ·ÖÅäÄÚ´æ
+    uint8_t *base[4]; // æœ‰å¤šé‡æ„ä¹‰ï¼Œå…¶ä¸€ç”¨NULL æ¥åˆ¤æ–­æ˜¯å¦åˆ†é…å†…å­˜
 } AVFrame;
 
-// AVCodecContext½á¹¹±íÊ¾³ÌĞòÔËĞĞµÄµ±Ç°CodecÊ¹ÓÃµÄÉÏÏÂÎÄ£¬×ÅÖØÓÚËùÓĞCodec¹²ÓĞµÄÊôĞÔ(²¢ÇÒÊÇÔÚ³ÌĞòÔËĞĞÊ±²ÅÄÜÈ·¶¨ÆäÖµ)ºÍ¹ØÁªÆäËû½á¹¹µÄ×Ö¶Î¡£
-// codec ºÍpriv_data ¹ØÁªÆäËû½á¹¹µÄ×Ö¶Î£¬±ãÓÚÔÚÊı¾İ½á¹¹¼äÌø×ª¡£
+// AVCodecContextç»“æ„è¡¨ç¤ºç¨‹åºè¿è¡Œçš„å½“å‰Codecä½¿ç”¨çš„ä¸Šä¸‹æ–‡ï¼Œç€é‡äºæ‰€æœ‰Codecå…±æœ‰çš„å±æ€§(å¹¶ä¸”æ˜¯åœ¨ç¨‹åºè¿è¡Œæ—¶æ‰èƒ½ç¡®å®šå…¶å€¼)å’Œå…³è”å…¶ä»–ç»“æ„çš„å­—æ®µã€‚
+// codec å’Œpriv_data å…³è”å…¶ä»–ç»“æ„çš„å­—æ®µï¼Œä¾¿äºåœ¨æ•°æ®ç»“æ„é—´è·³è½¬ã€‚
 typedef struct AVCodecContext {
     int bit_rate;
     int frame_number; // audio or video frame number
 
     unsigned char
-        *extradata;     // CodecµÄË½ÓĞÊı¾İ£¬¶ÔAudioÊÇWAVEFORMATEX½á¹¹À©Õ¹×Ö½Ú¡£
-    int extradata_size; // ¶ÔVideoÊÇBITMAPINFOHEADERºóµÄÀ©Õ¹×Ö½Ú
+        *extradata;     // Codecçš„ç§æœ‰æ•°æ®ï¼Œå¯¹Audioæ˜¯WAVEFORMATEXç»“æ„æ‰©å±•å­—èŠ‚ã€‚
+    int extradata_size; // å¯¹Videoæ˜¯BITMAPINFOHEADERåçš„æ‰©å±•å­—èŠ‚
 
     int width, height; // video only
 
-    enum PixelFormat pix_fmt; // Êä³öÏñËØ¸ñÊ½/ÊÓÆµÍ¼Ïñ¸ñÊ½
+    enum PixelFormat pix_fmt; // è¾“å‡ºåƒç´ æ ¼å¼/è§†é¢‘å›¾åƒæ ¼å¼
 
     int sample_rate; // samples per sec  // audio only
     int channels;
     int bits_per_sample;
     int block_align;
 
-    struct AVCodec *codec; // Ö¸ÏòCodec µÄÖ¸Õë
-    void *priv_data;       // AVCodec½á¹¹ÖĞµÄpriv_data_size Åä¶ÔÊ¹ÓÃ
+    struct AVCodec *codec; // æŒ‡å‘Codec çš„æŒ‡é’ˆ
+    void *priv_data;       // AVCodecç»“æ„ä¸­çš„priv_data_size é…å¯¹ä½¿ç”¨
 
     enum CodecType codec_type; // see CODEC_TYPE_xxx
     enum CodecID codec_id;     // see CODEC_ID_xxx
@@ -89,30 +89,30 @@ typedef struct AVCodecContext {
     struct AVPaletteControl *palctrl;
 } AVCodecContext;
 
-// ±íÊ¾ÒôÊÓÆµ±à½âÂëÆ÷£¬×ÅÖØÓÚ¹¦ÄÜº¯Êı£¬Ò»ÖÖÃ½ÌåÀàĞÍ¶ÔÓ¦Ò»¸öAVCodec½á¹¹£¬ÔÚ³ÌĞòÔËĞĞÊ±ÓĞ¶à¸öÊµÀı´®Áª³ÉÁ´±í±ãÓÚ²éÕÒ¡£
+// è¡¨ç¤ºéŸ³è§†é¢‘ç¼–è§£ç å™¨ï¼Œç€é‡äºåŠŸèƒ½å‡½æ•°ï¼Œä¸€ç§åª’ä½“ç±»å‹å¯¹åº”ä¸€ä¸ªAVCodecç»“æ„ï¼Œåœ¨ç¨‹åºè¿è¡Œæ—¶æœ‰å¤šä¸ªå®ä¾‹ä¸²è”æˆé“¾è¡¨ä¾¿äºæŸ¥æ‰¾ã€‚
 typedef struct AVCodec {
-    const char *name;    // ±êÊ¾CodecµÄÃû×Ö
-    enum CodecType type; // ±êÊ¾CodecµÄÀàĞÍ£¬ÓĞVideo £¬Audio£¬Data µÈÀàĞÍ
-    enum CodecID id; // ±êÊ¾CodecµÄID£¬ÓĞCODEC_ID_MSRLE£¬CODEC_ID_TRUESPEECH µÈ
-    int priv_data_size; // ±êÊ¾¾ßÌåµÄCodec¶ÔÓ¦µÄContextµÄ´óĞ¡
+    const char *name;    // æ ‡ç¤ºCodecçš„åå­—
+    enum CodecType type; // æ ‡ç¤ºCodecçš„ç±»å‹ï¼Œæœ‰Video ï¼ŒAudioï¼ŒData ç­‰ç±»å‹
+    enum CodecID id; // æ ‡ç¤ºCodecçš„IDï¼Œæœ‰CODEC_ID_MSRLEï¼ŒCODEC_ID_TRUESPEECH ç­‰
+    int priv_data_size; // æ ‡ç¤ºå…·ä½“çš„Codecå¯¹åº”çš„Contextçš„å¤§å°
 
-    // ±êÊ¾Codec¶ÔÍâÌá¹©µÄ²Ù×÷
+    // æ ‡ç¤ºCodecå¯¹å¤–æä¾›çš„æ“ä½œ
     int (*init)(AVCodecContext *);
     int (*encode)(AVCodecContext *, uint8_t *buf, int buf_size, void *data);
     int (*close)(AVCodecContext *);
     int (*decode)(AVCodecContext *, void *outdata, int *outdata_size,
                   uint8_t *buf, int buf_size);
-    int capabilities; // ±êÊ¾CodecµÄÄÜÁ¦£¬ÔÚÊİÉíºóµÄffplayÖĞÃ»Ì«´ó×÷ÓÃ£¬¿ÉºöÂÔ
+    int capabilities; // æ ‡ç¤ºCodecçš„èƒ½åŠ›ï¼Œåœ¨ç˜¦èº«åçš„ffplayä¸­æ²¡å¤ªå¤§ä½œç”¨ï¼Œå¯å¿½ç•¥
 
-    struct AVCodec *next; // ÓÃÓÚ°ÑËùÓĞCodec´®³ÉÒ»¸öÁ´±í£¬±ãÓÚ±éÀú
+    struct AVCodec *next; // ç”¨äºæŠŠæ‰€æœ‰Codecä¸²æˆä¸€ä¸ªé“¾è¡¨ï¼Œä¾¿äºéå†
 } AVCodec;
 
-// µ÷É«°å´óĞ¡ºÍ´óĞ¡ºê¶¨Òå£¬Ã¿¸öµ÷É«°åËÄ×Ö½Ú(R,G,B,¦Á)¡£
-// ÓĞºÜ¶àµÄÊÓÆµÍ¼ÏñÑÕÉ«ÖÖÀà±È½ÏÉÙ£¬ÓÃË÷Òı¼ä½Ó±íÊ¾Ã¿¸öÏñËØµÄÑÕÉ«Öµ£¬¾Í¿ÉÒÔÓÃµ÷É«°åºÍË÷ÒıÖµÊµÏÖ¼òµ¥µÄ´óÔ¼µÄ4:1
-// Ñ¹Ëõ±È¡£
+// è°ƒè‰²æ¿å¤§å°å’Œå¤§å°å®å®šä¹‰ï¼Œæ¯ä¸ªè°ƒè‰²æ¿å››å­—èŠ‚(R,G,B,Î±)ã€‚
+// æœ‰å¾ˆå¤šçš„è§†é¢‘å›¾åƒé¢œè‰²ç§ç±»æ¯”è¾ƒå°‘ï¼Œç”¨ç´¢å¼•é—´æ¥è¡¨ç¤ºæ¯ä¸ªåƒç´ çš„é¢œè‰²å€¼ï¼Œå°±å¯ä»¥ç”¨è°ƒè‰²æ¿å’Œç´¢å¼•å€¼å®ç°ç®€å•çš„å¤§çº¦çš„4:1
+// å‹ç¼©æ¯”ã€‚
 #define AVPALETTE_SIZE 1024
 #define AVPALETTE_COUNT 256
-// µ÷É«°åÊı¾İ½á¹¹¶¨Òå£¬±£´æµ÷É«°åÊı¾İ¡£
+// è°ƒè‰²æ¿æ•°æ®ç»“æ„å®šä¹‰ï¼Œä¿å­˜è°ƒè‰²æ¿æ•°æ®ã€‚
 typedef struct AVPaletteControl {
     // demuxer sets this to 1 to indicate the palette has changed; decoder
     // resets to 0
@@ -126,7 +126,7 @@ typedef struct AVPaletteControl {
 
 } AVPaletteControl;
 
-// ±à½âÂë¿âÊ¹ÓÃµÄº¯ÊıÉùÃ÷¡£
+// ç¼–è§£ç åº“ä½¿ç”¨çš„å‡½æ•°å£°æ˜ã€‚
 int avpicture_alloc(AVPicture *picture, int pix_fmt, int width, int height);
 
 void avpicture_free(AVPicture *picture);

@@ -13,14 +13,14 @@ extern "C" {
 #define AV_STRINGIFY(s) AV_TOSTRING(s)
 #define AV_TOSTRING(s) #s
 
-// �汾��Ϣ��ʾ�ĺ궨��
+// 版本信息标示的宏定义
 #define LIBAVUTIL_VERSION_INT ((49 << 16) + (0 << 8) + 0)
 #define LIBAVUTIL_VERSION 49.0.0
 #define LIBAVUTIL_BUILD LIBAVUTIL_VERSION_INT
 
 #define LIBAVUTIL_IDENT "Lavu" AV_STRINGIFY(LIBAVUTIL_VERSION)
 
-// ���ظ�ʽ�ĺ궨�壬���ڴ����д��ά����
+// 像素格式的宏定义，便于代码编写和维护。
 enum PixelFormat {
     PIX_FMT_NONE = -1,
     PIX_FMT_YUV420P, // Planar YUV 4:2:0 (1 Cr & Cb sample per 2x2 Y samples)

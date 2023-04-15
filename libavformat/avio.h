@@ -1,28 +1,28 @@
 #ifndef AVIO_H
 #define AVIO_H
 
-// ÎÄ¼ş¶ÁĞ´Ä£¿é¶¨ÒåµÄÊı¾İ½á¹¹ºÍº¯ÊıÉùÃ÷
+// æ–‡ä»¶è¯»å†™æ¨¡å—å®šä¹‰çš„æ•°æ®ç»“æ„å’Œå‡½æ•°å£°æ˜
 
 #define URL_EOF (-1)
 
 typedef int64_t offset_t;
 
-// ¼òµ¥µÄÎÄ¼ş´æÈ¡ºê¶¨Òå
+// ç®€å•çš„æ–‡ä»¶å­˜å–å®å®šä¹‰
 #define URL_RDONLY 0
 #define URL_WRONLY 1
 #define URL_RDWR 2
 
-// URLContext ½á¹¹±íÊ¾³ÌĞòÔËĞĞµÄµ±Ç°¹ãÒåÊäÈëÎÄ¼şÊ¹ÓÃµÄÉÏÏÂÎÄ£¬
-// ×ÅÖØÓÚËùÓĞ¹ãÒåÊäÈëÎÄ¼ş¹²ÓĞµÄÊôĞÔ(²¢ÇÒÊÇÔÚ³ÌĞòÔËĞĞÊ±²ÅÄÜÈ·¶¨ÆäÖµ)ºÍ¹ØÁªÆäËû½á¹¹µÄ×Ö¶Î
+// URLContext ç»“æ„è¡¨ç¤ºç¨‹åºè¿è¡Œçš„å½“å‰å¹¿ä¹‰è¾“å…¥æ–‡ä»¶ä½¿ç”¨çš„ä¸Šä¸‹æ–‡ï¼Œ
+// ç€é‡äºæ‰€æœ‰å¹¿ä¹‰è¾“å…¥æ–‡ä»¶å…±æœ‰çš„å±æ€§(å¹¶ä¸”æ˜¯åœ¨ç¨‹åºè¿è¡Œæ—¶æ‰èƒ½ç¡®å®šå…¶å€¼)å’Œå…³è”å…¶ä»–ç»“æ„çš„å­—æ®µ
 typedef struct URLContext {
-    struct URLProtocol *prot; // prot ×Ö¶Î¹ØÁªÏàÓ¦µÄ¹ãÒåÊäÈëÎÄ¼ş
-    int flags;                // ÎÄ¼ş¶ÁĞ´ÀàĞÍ
-    int max_packet_size;      // Èç¹û·Ç0£¬±íÊ¾×î´ó°ü´óĞ¡£¬ÓÃÓÚ·ÖÅä×ã¹»µÄ»º´æ¡£
-    void *priv_data;          // ÔÚ±¾ÀıÖĞ£¬¹ØÁªÒ»¸öÎÄ¼ş¾ä±ú
+    struct URLProtocol *prot; // prot å­—æ®µå…³è”ç›¸åº”çš„å¹¿ä¹‰è¾“å…¥æ–‡ä»¶
+    int flags;                // æ–‡ä»¶è¯»å†™ç±»å‹
+    int max_packet_size;      // å¦‚æœé0ï¼Œè¡¨ç¤ºæœ€å¤§åŒ…å¤§å°ï¼Œç”¨äºåˆ†é…è¶³å¤Ÿçš„ç¼“å­˜ã€‚
+    void *priv_data;          // åœ¨æœ¬ä¾‹ä¸­ï¼Œå…³è”ä¸€ä¸ªæ–‡ä»¶å¥æŸ„
     char filename[1];         // specified filename
 } URLContext;
 
-// ±íÊ¾¹ãÒåµÄÊäÈëÎÄ¼ş£¬×ÅÖØÓÚ¹¦ÄÜº¯Êı£¬ÊİÉíºóµÄffplayÖ»Ö§³ÖfileÒ»ÖÖÊäÈëÎÄ¼ş
+// è¡¨ç¤ºå¹¿ä¹‰çš„è¾“å…¥æ–‡ä»¶ï¼Œç€é‡äºåŠŸèƒ½å‡½æ•°ï¼Œç˜¦èº«åçš„ffplayåªæ”¯æŒfileä¸€ç§è¾“å…¥æ–‡ä»¶
 typedef struct URLProtocol {
     const char *name;
     int (*url_open)(URLContext *h, const char *filename, int flags);
@@ -31,23 +31,23 @@ typedef struct URLProtocol {
     offset_t (*url_seek)(URLContext *h, offset_t pos, int whence);
     int (*url_close)(URLContext *h);
     struct URLProtocol
-        *next; // ÓÃÓÚ°ÑËùÓĞÖ§³ÖµÄ¹ãÒåµÄÊäÈëÎÄ¼şÁ¬½Ó³ÉÁ´±í£¬±ãÓÚ±éÀú²éÕÒ¡£
+        *next; // ç”¨äºæŠŠæ‰€æœ‰æ”¯æŒçš„å¹¿ä¹‰çš„è¾“å…¥æ–‡ä»¶è¿æ¥æˆé“¾è¡¨ï¼Œä¾¿äºéå†æŸ¥æ‰¾ã€‚
 } URLProtocol;
 
-// ByteIOContext½á¹¹
+// ByteIOContextç»“æ„
 //	+-------------------+-------------------+--------------------------+--------------------+
-//	|					|	»º´æÒÑ¾­Ê¹ÓÃ	   |  »º´æÎ´Ê¹ÓÃÊı¾İ	|	ÎÄ¼şÎ´¶ÁÊı¾İ
+//	|					|	ç¼“å­˜å·²ç»ä½¿ç”¨	   |  ç¼“å­˜æœªä½¿ç”¨æ•°æ®	|	æ–‡ä»¶æœªè¯»æ•°æ®
 //|
 //	+-------------------+-------------------+--------------------------+--------------------+
 //	|                   |			|                  |				|
-// ÎÄ¼şÆğÊ¼Î»ÖÃ		  buffer			 buf_ptr            buf_end
+// æ–‡ä»¶èµ·å§‹ä½ç½®		  buffer			 buf_ptr            buf_end
 
-// À©Õ¹URLProtocol½á¹¹³ÉÄÚ²¿ÓĞ»º³å»úÖÆµÄ¹ã·ºÒâÒåÉÏµÄÎÄ¼ş£¬¸ÄÉÆ¹ãÒåÊäÈëÎÄ¼şµÄIOĞÔÄÜ¡£
+// æ‰©å±•URLProtocolç»“æ„æˆå†…éƒ¨æœ‰ç¼“å†²æœºåˆ¶çš„å¹¿æ³›æ„ä¹‰ä¸Šçš„æ–‡ä»¶ï¼Œæ”¹å–„å¹¿ä¹‰è¾“å…¥æ–‡ä»¶çš„IOæ€§èƒ½ã€‚
 typedef struct ByteIOContext {
-    unsigned char *buffer;            // »º´æÊ×µØÖ·
-    int buffer_size;                  // »º´æ´óĞ¡
-    unsigned char *buf_ptr, *buf_end; // »º´æ¶ÁÖ¸ÕëºÍÄ©Ö¸Õë
-    void *opaque;                     // ¹ØÁªURLContext
+    unsigned char *buffer;            // ç¼“å­˜é¦–åœ°å€
+    int buffer_size;                  // ç¼“å­˜å¤§å°
+    unsigned char *buf_ptr, *buf_end; // ç¼“å­˜è¯»æŒ‡é’ˆå’Œæœ«æŒ‡é’ˆ
+    void *opaque;                     // å…³è”URLContext
     int (*read_buf)(void *opaque, uint8_t *buf, int buf_size);
     int (*write_buf)(void *opaque, uint8_t *buf, int buf_size);
     offset_t (*seek)(void *opaque, offset_t offset, int whence);
@@ -55,7 +55,7 @@ typedef struct ByteIOContext {
     int must_flush;      // true if the next seek should flush
     int eof_reached;     // true if eof reached
     int write_flag;      // true if open for writing
-    int max_packet_size; // Èç¹û·Ç0£¬±íÊ¾×î´óÊı¾İÖ¡´óĞ¡£¬ÓÃÓÚ·ÖÅä×ã¹»µÄ»º´æ¡£
+    int max_packet_size; // å¦‚æœé0ï¼Œè¡¨ç¤ºæœ€å¤§æ•°æ®å¸§å¤§å°ï¼Œç”¨äºåˆ†é…è¶³å¤Ÿçš„ç¼“å­˜ã€‚
     int error;           // contains the error code or 0 if no error happened
 } ByteIOContext;
 

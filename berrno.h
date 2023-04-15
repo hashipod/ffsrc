@@ -1,7 +1,7 @@
 #ifndef BERRNO_H
 #define BERRNO_H
 
-// 简单的错误码定义，用于描述错误类型
+// 绠�鍗曠殑閿欒鐮佸畾涔夛紝鐢ㄤ簬鎻忚堪閿欒绫诲瀷
 #ifdef ENOENT
 #undef ENOENT
 #endif

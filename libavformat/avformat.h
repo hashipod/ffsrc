@@ -1,7 +1,7 @@
 #ifndef AVFORMAT_H
 #define AVFORMAT_H
 
-// ¶¨ÒåÊ¶±ðÎÄ¼þ¸ñÊ½ºÍÃ½ÌåÀàÐÍ¿âÊ¹ÓÃµÄºê¡¢Êý¾Ý½á¹¹ºÍº¯Êý£¬Í¨³£ÕâÐ©ºê¡¢Êý¾Ý½á¹¹ºÍº¯ÊýÔÚ´ËÄ£¿éÄÚÏà¶ÔÈ«¾ÖÓÐÐ§¡£
+// å®šä¹‰è¯†åˆ«æ–‡ä»¶æ ¼å¼å’Œåª’ä½“ç±»åž‹åº“ä½¿ç”¨çš„å®ã€æ•°æ®ç»“æž„å’Œå‡½æ•°ï¼Œé€šå¸¸è¿™äº›å®ã€æ•°æ®ç»“æž„å’Œå‡½æ•°åœ¨æ­¤æ¨¡å—å†…ç›¸å¯¹å…¨å±€æœ‰æ•ˆã€‚
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -15,7 +15,7 @@ extern "C" {
 #include "../libavcodec/avcodec.h"
 #include "avio.h"
 
-// ´íÎóÖµ
+// é”™è¯¯å€¼
 #define AVERROR_UNKNOWN (-1)     // unknown error
 #define AVERROR_IO (-2)          // i/o error
 #define AVERROR_NUMEXPECTED (-3) // number syntax expected in filename
@@ -38,56 +38,56 @@ extern "C" {
 
 #define MAX_STREAMS 20
 
-// ´ú±íÒôÊÓÆµÊý¾ÝÖ¡£¬¹ÌÓÐµÄÊôÐÔÊÇÒ»Ð©±ê¼Ç£¬Ê±ÖÓÐÅÏ¢£¬ºÍÑ¹ËõÊý¾ÝÊ×µØÖ·£¬´óÐ¡µÈÐÅÏ¢¡£
-// ÒôÊÓÆµÊý¾Ý°ü¶¨Òå£¬ÔÚÊÝÉíºóµÄffplay ÖÐ£¬Ã¿Ò»¸ö°üÊÇÒ»¸öÍêÕûµÄÊý¾ÝÖ¡¡£
-// ×¢Òâ±£´æÒôÊÓÆµÊý¾Ý°üµÄÄÚ´æÊÇmalloc ³öÀ´µÄ£¬ÓÃÍêºóÓ¦¼°Ê±ÓÃfree ¹é»¹¸øÏµÍ³¡£
+// ä»£è¡¨éŸ³è§†é¢‘æ•°æ®å¸§ï¼Œå›ºæœ‰çš„å±žæ€§æ˜¯ä¸€äº›æ ‡è®°ï¼Œæ—¶é’Ÿä¿¡æ¯ï¼Œå’ŒåŽ‹ç¼©æ•°æ®é¦–åœ°å€ï¼Œå¤§å°ç­‰ä¿¡æ¯ã€‚
+// éŸ³è§†é¢‘æ•°æ®åŒ…å®šä¹‰ï¼Œåœ¨ç˜¦èº«åŽçš„ffplay ä¸­ï¼Œæ¯ä¸€ä¸ªåŒ…æ˜¯ä¸€ä¸ªå®Œæ•´çš„æ•°æ®å¸§ã€‚
+// æ³¨æ„ä¿å­˜éŸ³è§†é¢‘æ•°æ®åŒ…çš„å†…å­˜æ˜¯malloc å‡ºæ¥çš„ï¼Œç”¨å®ŒåŽåº”åŠæ—¶ç”¨free å½’è¿˜ç»™ç³»ç»Ÿã€‚
 typedef struct AVPacket {
-    int64_t pts;   // ±íÊ¾Ê±¼ä£¬¶ÔÊÓÆµÊÇÏÔÊ¾Ê±¼ä
-    int64_t dts;   // ½âÂëÊ±¼ä£¬Õâ¸ö²»ÊÇºÜÖØÒª?
+    int64_t pts;   // è¡¨ç¤ºæ—¶é—´ï¼Œå¯¹è§†é¢‘æ˜¯æ˜¾ç¤ºæ—¶é—´
+    int64_t dts;   // è§£ç æ—¶é—´ï¼Œè¿™ä¸ªä¸æ˜¯å¾ˆé‡è¦?
     int64_t pos;   // byte position in stream, -1 if unknown
-    uint8_t *data; // Êµ¼Ê±£´æÒôÊÓÆµÊý¾Ý»º´æµÄÊ×µØÖ·
-    int size;      // Êµ¼Ê±£´æÒôÊÓÆµÊý¾Ý»º´æµÄ´óÐ¡
-    int stream_index; // µ±Ç°ÒôÊÓÆµÊý¾Ý°ü¶ÔÓ¦µÄÁ÷Ë÷Òý£¬ÔÚ±¾ÀýÖÐÓÃÓÚÇø±ðÒôÆµ»¹ÊÇÊÓÆµ¡£
-    int flags;        // Êý¾Ý°üµÄÒ»Ð©±ê¼Ç£¬±ÈÈçÊÇ·ñÊÇ¹Ø¼üÖ¡µÈ¡£
+    uint8_t *data; // å®žé™…ä¿å­˜éŸ³è§†é¢‘æ•°æ®ç¼“å­˜çš„é¦–åœ°å€
+    int size;      // å®žé™…ä¿å­˜éŸ³è§†é¢‘æ•°æ®ç¼“å­˜çš„å¤§å°
+    int stream_index; // å½“å‰éŸ³è§†é¢‘æ•°æ®åŒ…å¯¹åº”çš„æµç´¢å¼•ï¼Œåœ¨æœ¬ä¾‹ä¸­ç”¨äºŽåŒºåˆ«éŸ³é¢‘è¿˜æ˜¯è§†é¢‘ã€‚
+    int flags;        // æ•°æ®åŒ…çš„ä¸€äº›æ ‡è®°ï¼Œæ¯”å¦‚æ˜¯å¦æ˜¯å…³é”®å¸§ç­‰ã€‚
     void (*destruct)(struct AVPacket *);
 } AVPacket;
 
-// °ÑÒôÊÓÆµAVPacket×é³ÉÒ»¸öÐ¡Á´±í¡£
-// ÒôÊÓÆµÊý¾Ý°üÁ´±í¶¨Òå£¬×¢ÒâÃ¿Ò»¸öAVPacketList
-// ½öº¬ÓÐÒ»¸öAVPacket£¬ºÍ´«Í³µÄºÜ¶àºÜ¶à½ÚµãµÄlist²»Í¬£¬²»Òª±»list Ãû×ÖÃÔ»ó¡£
+// æŠŠéŸ³è§†é¢‘AVPacketç»„æˆä¸€ä¸ªå°é“¾è¡¨ã€‚
+// éŸ³è§†é¢‘æ•°æ®åŒ…é“¾è¡¨å®šä¹‰ï¼Œæ³¨æ„æ¯ä¸€ä¸ªAVPacketList
+// ä»…å«æœ‰ä¸€ä¸ªAVPacketï¼Œå’Œä¼ ç»Ÿçš„å¾ˆå¤šå¾ˆå¤šèŠ‚ç‚¹çš„listä¸åŒï¼Œä¸è¦è¢«list åå­—è¿·æƒ‘ã€‚
 typedef struct AVPacketList {
     AVPacket pkt;
-    struct AVPacketList *next; // ÓÃÓÚ°Ñ¸÷¸öAVPacketList ´®ÁªÆðÀ´¡£
+    struct AVPacketList *next; // ç”¨äºŽæŠŠå„ä¸ªAVPacketList ä¸²è”èµ·æ¥ã€‚
 } AVPacketList;
 
-// ÊÍ·ÅµôÒôÊÓÆµÊý¾Ý°üÕ¼ÓÃµÄÄÚ´æ£¬°ÑÊ×µØÖ·ÖÃ¿ÕÊÇÒ»¸öºÜºÃµÄÏ°¹ß¡£
+// é‡Šæ”¾æŽ‰éŸ³è§†é¢‘æ•°æ®åŒ…å ç”¨çš„å†…å­˜ï¼ŒæŠŠé¦–åœ°å€ç½®ç©ºæ˜¯ä¸€ä¸ªå¾ˆå¥½çš„ä¹ æƒ¯ã€‚
 static inline void av_destruct_packet(AVPacket *pkt) {
     av_free(pkt->data);
     pkt->data = NULL;
     pkt->size = 0;
 }
 
-// ÊÍ·ÅµôÒôÊÓÆµÊý¾Ý°üÕ¼ÓÃµÄÄÚ´æ¡£
+// é‡Šæ”¾æŽ‰éŸ³è§†é¢‘æ•°æ®åŒ…å ç”¨çš„å†…å­˜ã€‚
 static inline void av_free_packet(AVPacket *pkt) {
     if (pkt && pkt->destruct)
         pkt->destruct(pkt);
 }
 
-// ¶ÁÎÄ¼þÍùÊý¾Ý°üÖÐÌîÊý¾Ý£¬×¢Òâ³ÌÐòÅÜµ½ÕâÀïÊ±£¬ÎÄ¼þÆ«ÒÆÁ¿ÒÑÈ·¶¨£¬Òª¶ÁÊý¾ÝµÄ´óÐ¡Ò²È·¶¨£¬
-// µ«ÊÇÊý¾Ý°üµÄ»º´æÃ»ÓÐ·ÖÅä¡£·ÖÅäºÃÄÚ´æºó£¬Òª³õÊ¼»¯°üµÄÒ»Ð©±äÁ¿¡£
+// è¯»æ–‡ä»¶å¾€æ•°æ®åŒ…ä¸­å¡«æ•°æ®ï¼Œæ³¨æ„ç¨‹åºè·‘åˆ°è¿™é‡Œæ—¶ï¼Œæ–‡ä»¶åç§»é‡å·²ç¡®å®šï¼Œè¦è¯»æ•°æ®çš„å¤§å°ä¹Ÿç¡®å®šï¼Œ
+// ä½†æ˜¯æ•°æ®åŒ…çš„ç¼“å­˜æ²¡æœ‰åˆ†é…ã€‚åˆ†é…å¥½å†…å­˜åŽï¼Œè¦åˆå§‹åŒ–åŒ…çš„ä¸€äº›å˜é‡ã€‚
 static inline int av_get_packet(ByteIOContext *s, AVPacket *pkt, int size) {
     int ret;
     unsigned char *data;
     if ((unsigned)size > (unsigned)size + FF_INPUT_BUFFER_PADDING_SIZE)
         return AVERROR_NOMEM;
-    // ·ÖÅäÊý¾Ý°ü»º´æ
+    // åˆ†é…æ•°æ®åŒ…ç¼“å­˜
     data = av_malloc(size + FF_INPUT_BUFFER_PADDING_SIZE);
     if (!data)
         return AVERROR_NOMEM;
 
     memset(data + size, 0, FF_INPUT_BUFFER_PADDING_SIZE);
 
-    // ³õÊ¼»¯Ïà¹ØÖµ
+    // åˆå§‹åŒ–ç›¸å…³å€¼
     pkt->pts = AV_NOPTS_VALUE;
     pkt->dts = AV_NOPTS_VALUE;
     pkt->pos = -1;
@@ -98,7 +98,7 @@ static inline int av_get_packet(ByteIOContext *s, AVPacket *pkt, int size) {
     pkt->destruct = av_destruct_packet;
 
     pkt->pos = url_ftell(s);
-    // Êµ¼Ê¶Á¹ãÒåÎÄ¼þÌî³äÊý¾Ý°ü£¬Èç¹û¶ÁÎÄ¼þ´íÎóÊ±Í¨³£ÊÇµ½ÁËÄ©Î²£¬Òª¹é»¹¸Õ¸Õmalloc³öÀ´µÄÄÚ´æ¡£
+    // å®žé™…è¯»å¹¿ä¹‰æ–‡ä»¶å¡«å……æ•°æ®åŒ…ï¼Œå¦‚æžœè¯»æ–‡ä»¶é”™è¯¯æ—¶é€šå¸¸æ˜¯åˆ°äº†æœ«å°¾ï¼Œè¦å½’è¿˜åˆšåˆšmallocå‡ºæ¥çš„å†…å­˜ã€‚
     ret = url_fread(s, pkt->data, size);
     if (ret <= 0)
         av_free_packet(pkt);
@@ -108,14 +108,14 @@ static inline int av_get_packet(ByteIOContext *s, AVPacket *pkt, int size) {
     return ret;
 }
 
-// ÎªÊ¶±ðÎÄ¼þ¸ñÊ½£¬ Òª¶ÁÒ»²¿·ÖÎÄ¼þÍ·Êý¾ÝÀ´·ÖÎöÆ¥ÅäffplayÖ§³ÖµÄÎÄ¼þ¸ñÊ½ÎÄ¼þÌØÕ÷¡£
+// ä¸ºè¯†åˆ«æ–‡ä»¶æ ¼å¼ï¼Œ è¦è¯»ä¸€éƒ¨åˆ†æ–‡ä»¶å¤´æ•°æ®æ¥åˆ†æžåŒ¹é…ffplayæ”¯æŒçš„æ–‡ä»¶æ ¼å¼æ–‡ä»¶ç‰¹å¾ã€‚
 typedef struct AVProbeData {
     const char *filename;
     unsigned char *buf;
     int buf_size;
 } AVProbeData;
 
-// ÎÄ¼þË÷Òý½á¹¹£¬flagsºÍsizeÎ»¶¨ÒåÊÇÎªÁË½ÚÊ¡ÄÚ´æ¡£
+// æ–‡ä»¶ç´¢å¼•ç»“æž„ï¼Œflagså’Œsizeä½å®šä¹‰æ˜¯ä¸ºäº†èŠ‚çœå†…å­˜ã€‚
 typedef struct AVIndexEntry {
     int64_t pos;
     int64_t timestamp;
@@ -125,36 +125,36 @@ typedef struct AVIndexEntry {
                    // 8byte align)
 } AVIndexEntry;
 
-// ±íÊ¾µ±Ç°Ã½ÌåÁ÷µÄÉÏÏÂÎÄ£¬×ÅÖØÓÚËùÓÐÃ½ÌåÁ÷¹²ÓÐµÄÊôÐÔ(²¢ÇÒÊÇÔÚ³ÌÐòÔËÐÐÊ±²ÅÄÜÈ·¶¨ÆäÖµ)ºÍ¹ØÁªÆäËû½á¹¹µÄ×Ö¶Î
+// è¡¨ç¤ºå½“å‰åª’ä½“æµçš„ä¸Šä¸‹æ–‡ï¼Œç€é‡äºŽæ‰€æœ‰åª’ä½“æµå…±æœ‰çš„å±žæ€§(å¹¶ä¸”æ˜¯åœ¨ç¨‹åºè¿è¡Œæ—¶æ‰èƒ½ç¡®å®šå…¶å€¼)å’Œå…³è”å…¶ä»–ç»“æž„çš„å­—æ®µ
 typedef struct AVStream {
-    AVCodecContext *actx; // ¹ØÁªµ±Ç°ÒôÊÓÆµÃ½ÌåÊ¹ÓÃµÄ±à½âÂëÆ÷
+    AVCodecContext *actx; // å…³è”å½“å‰éŸ³è§†é¢‘åª’ä½“ä½¿ç”¨çš„ç¼–è§£ç å™¨
 
     void *
-        priv_data; // AVIStream ¹ØÁª½âÎö¸÷¸ö¾ßÌåÃ½ÌåÁ÷ÓëÎÄ¼þÈÝÆ÷ÓÐ¹ØµÄ¶ÀÓÐµÄÊôÐÔ
+        priv_data; // AVIStream å…³è”è§£æžå„ä¸ªå…·ä½“åª’ä½“æµä¸Žæ–‡ä»¶å®¹å™¨æœ‰å…³çš„ç‹¬æœ‰çš„å±žæ€§
 
-    AVRational time_base; // ÓÉ av_set_pts_info()º¯Êý³õÊ¼»¯
+    AVRational time_base; // ç”± av_set_pts_info()å‡½æ•°åˆå§‹åŒ–
 
     AVIndexEntry *index_entries; // only used if the format does not support
                                  // seeking natively
     int nb_index_entries;
     int index_entries_allocated_size;
 
-    double frame_last_delay; // Ö¡×îºóÑÓ³Ù
+    double frame_last_delay; // å¸§æœ€åŽå»¶è¿Ÿ
 } AVStream;
 
 // AVFormatParameters
-// ½á¹¹ÔÚÊÝÉíºóµÄffplayÖÐÃ»ÓÐÊµ¼ÊÒâÒå£¬Îª±£Ö¤º¯Êý½Ó¿Ú²»±ä£¬Ã»ÓÐÉ¾³ý¡£
+// ç»“æž„åœ¨ç˜¦èº«åŽçš„ffplayä¸­æ²¡æœ‰å®žé™…æ„ä¹‰ï¼Œä¸ºä¿è¯å‡½æ•°æŽ¥å£ä¸å˜ï¼Œæ²¡æœ‰åˆ é™¤ã€‚
 typedef struct AVFormatParameters {
     int dbg; // only for debug
 } AVFormatParameters;
 
-// AVInputFormat ¶¨ÒåÊäÈëÎÄ¼þÈÝÆ÷¸ñÊ½£¬×ÅÖØÓÚ¹¦ÄÜº¯Êý£¬
-// Ò»ÖÖÎÄ¼þÈÝÆ÷¸ñÊ½¶ÔÓ¦Ò»¸öAVInputFormat½á¹¹£¬ÔÚ³ÌÐòÔËÐÐÊ±ÓÐ¶à¸öÊµÀý£¬µ«ÊÝÉíºóffplay
-// ½öÒ»¸öÊµÀý¡£
+// AVInputFormat å®šä¹‰è¾“å…¥æ–‡ä»¶å®¹å™¨æ ¼å¼ï¼Œç€é‡äºŽåŠŸèƒ½å‡½æ•°ï¼Œ
+// ä¸€ç§æ–‡ä»¶å®¹å™¨æ ¼å¼å¯¹åº”ä¸€ä¸ªAVInputFormatç»“æž„ï¼Œåœ¨ç¨‹åºè¿è¡Œæ—¶æœ‰å¤šä¸ªå®žä¾‹ï¼Œä½†ç˜¦èº«åŽffplay
+// ä»…ä¸€ä¸ªå®žä¾‹ã€‚
 typedef struct AVInputFormat {
-    const char *name; // ÎÄ¼þÈÝÆ÷¸ñÊ½Ãû£¬ÓÃÓÚÈËÐÔ»¯ÔÄ¶Á£¬Î¬»¤´úÂë
+    const char *name; // æ–‡ä»¶å®¹å™¨æ ¼å¼åï¼Œç”¨äºŽäººæ€§åŒ–é˜…è¯»ï¼Œç»´æŠ¤ä»£ç 
 
-    int priv_data_size; // ±êÊ¾¾ßÌåµÄÎÄ¼þÈÝÆ÷¸ñÊ½¶ÔÓ¦µÄContextµÄ´óÐ¡
+    int priv_data_size; // æ ‡ç¤ºå…·ä½“çš„æ–‡ä»¶å®¹å™¨æ ¼å¼å¯¹åº”çš„Contextçš„å¤§å°
 
     int (*read_probe)(AVProbeData *);
 
@@ -164,28 +164,28 @@ typedef struct AVInputFormat {
 
     int (*read_close)(struct AVFormatContext *);
 
-    const char *extensions; // ÎÄ¼þÀ©Õ¹Ãû
+    const char *extensions; // æ–‡ä»¶æ‰©å±•å
 
     struct AVInputFormat
-        *next; // ÓÃÓÚ°Ñffplay Ö§³ÖµÄËùÓÐÎÄ¼þÈÝÆ÷¸ñÊ½Á´³ÉÒ»¸öÁ´±í¡£
+        *next; // ç”¨äºŽæŠŠffplay æ”¯æŒçš„æ‰€æœ‰æ–‡ä»¶å®¹å™¨æ ¼å¼é“¾æˆä¸€ä¸ªé“¾è¡¨ã€‚
 
 } AVInputFormat;
 
 // AVFormatContext
-// ½á¹¹±íÊ¾³ÌÐòÔËÐÐµÄµ±Ç°ÎÄ¼þÈÝÆ÷¸ñÊ½Ê¹ÓÃµÄÉÏÏÂÎÄ£¬×ÅÖØÓÚËùÓÐÎÄ¼þÈÝÆ÷¹²ÓÐµÄÊôÐÔ(²¢
-// ÇÒÊÇÔÚ³ÌÐòÔËÐÐÊ±²ÅÄÜÈ·¶¨ÆäÖµ)ºÍ³ÌÐòÔËÐÐºó½öÒ»¸öÊµÀý¡£
+// ç»“æž„è¡¨ç¤ºç¨‹åºè¿è¡Œçš„å½“å‰æ–‡ä»¶å®¹å™¨æ ¼å¼ä½¿ç”¨çš„ä¸Šä¸‹æ–‡ï¼Œç€é‡äºŽæ‰€æœ‰æ–‡ä»¶å®¹å™¨å…±æœ‰çš„å±žæ€§(å¹¶
+// ä¸”æ˜¯åœ¨ç¨‹åºè¿è¡Œæ—¶æ‰èƒ½ç¡®å®šå…¶å€¼)å’Œç¨‹åºè¿è¡ŒåŽä»…ä¸€ä¸ªå®žä¾‹ã€‚
 typedef struct AVFormatContext // format I/O context
 {
-    struct AVInputFormat *iformat; // ¹ØÁªÏàÓ¦µÄÎÄ¼þÈÝÆ÷¸ñÊ½
+    struct AVInputFormat *iformat; // å…³è”ç›¸åº”çš„æ–‡ä»¶å®¹å™¨æ ¼å¼
 
     void *
-        priv_data; // Ö¸Ïò¾ßÌåµÄÎÄ¼þÈÝÆ÷¸ñÊ½µÄÉÏÏÂÎÄContextºÍpriv_data_sizeÅä¶ÔÊ¹ÓÃ
+        priv_data; // æŒ‡å‘å…·ä½“çš„æ–‡ä»¶å®¹å™¨æ ¼å¼çš„ä¸Šä¸‹æ–‡Contextå’Œpriv_data_sizeé…å¯¹ä½¿ç”¨
 
-    ByteIOContext pb; // ¹ã·ºÒâÒåµÄÊäÈëÎÄ¼þ ????
+    ByteIOContext pb; // å¹¿æ³›æ„ä¹‰çš„è¾“å…¥æ–‡ä»¶ ????
 
-    int nb_streams; // ¹ãÒåÊäÈëÎÄ¼þÖÐÃ½ÌåÁ÷¼ÆÊý
+    int nb_streams; // å¹¿ä¹‰è¾“å…¥æ–‡ä»¶ä¸­åª’ä½“æµè®¡æ•°
 
-    AVStream *streams[MAX_STREAMS]; // ¹ØÁªÒôÊÓÆµÁ÷
+    AVStream *streams[MAX_STREAMS]; // å…³è”éŸ³è§†é¢‘æµ
 
 } AVFormatContext;
 

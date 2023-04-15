@@ -11,8 +11,8 @@
 #define CONFIG_WIN32
 #endif
 
-// ÄÚÁªº¯ÊıµÄ¹Ø¼ü×ÖÔÚlinux gcc ºÍwindows vc ÖĞµÄ¶¨ÒåÊÇ²»Í¬µÄ£¬gcc ÊÇinline£¬vc
-// ÊÇ__inline¡£ ÒòÎª´úÂëÊÇ´Ólinux ÏÂÒÆÖ²¹ıÀ´µÄ£¬ÔÚÕâÀï×öÒ»¸öºê¶¨ÒåĞŞ¸ÄÏà¶Ô¼òµ¥¡£
+// å†…è”å‡½æ•°çš„å…³é”®å­—åœ¨linux gcc å’Œwindows vc ä¸­çš„å®šä¹‰æ˜¯ä¸åŒçš„ï¼Œgcc æ˜¯inlineï¼Œvc
+// æ˜¯__inlineã€‚ å› ä¸ºä»£ç æ˜¯ä»linux ä¸‹ç§»æ¤è¿‡æ¥çš„ï¼Œåœ¨è¿™é‡Œåšä¸€ä¸ªå®å®šä¹‰ä¿®æ”¹ç›¸å¯¹ç®€å•ã€‚
 #ifdef CONFIG_WIN32
 #define inline __inline
 #endif
@@ -24,8 +24,8 @@ typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
 
-// ¼òµ¥µÄÊı¾İÀàĞÍ¶¨Òå£¬ linux gcc ºÍwindows vc ±àÒëÆ÷ÓĞÉÔĞí²»Í¬£¬
-// ÓÃºê¿ª¹ØCONFIG_WIN32À´ÆÁ±Î64Î»ÕûÊıÀàĞÍµÄ²î±ğ¡£
+// ç®€å•çš„æ•°æ®ç±»å‹å®šä¹‰ï¼Œ linux gcc å’Œwindows vc ç¼–è¯‘å™¨æœ‰ç¨è®¸ä¸åŒï¼Œ
+// ç”¨å®å¼€å…³CONFIG_WIN32æ¥å±è”½64ä½æ•´æ•°ç±»å‹çš„å·®åˆ«ã€‚
 #ifdef CONFIG_WIN32
 typedef signed __int64 int64_t;
 typedef unsigned __int64 uint64_t;
@@ -34,10 +34,10 @@ typedef signed long long int64_t;
 typedef unsigned long long uint64_t;
 #endif
 
-// 64 Î»ÕûÊıµÄ¶¨ÒåÓï·¨£¬linux gcc ºÍwindows vc
-// ±àÒëÆ÷ÓĞÉÔĞí²»Í¬£¬ÓÃºê¿ª¹ØCONFIG_WIN32 À´ÆÁ±Î64Î»ÕûÊı¶¨ÒåµÄ²î±ğ¡£ Linux ÓÃLL
-// / ULL À´±íÊ¾64 Î»ÕûÊı£¬VC ÓÃi64 À´±íÊ¾64
-// Î»ÕûÊı¡£##ÊÇÁ¬½Ó·û£¬°Ñ##Ç°ºóµÄÁ½¸ö×Ö·û´®Á¬½Ó³ÉÒ»¸ö×Ö·û´®¡£
+// 64 ä½æ•´æ•°çš„å®šä¹‰è¯­æ³•ï¼Œlinux gcc å’Œwindows vc
+// ç¼–è¯‘å™¨æœ‰ç¨è®¸ä¸åŒï¼Œç”¨å®å¼€å…³CONFIG_WIN32 æ¥å±è”½64ä½æ•´æ•°å®šä¹‰çš„å·®åˆ«ã€‚ Linux ç”¨LL
+// / ULL æ¥è¡¨ç¤º64 ä½æ•´æ•°ï¼ŒVC ç”¨i64 æ¥è¡¨ç¤º64
+// ä½æ•´æ•°ã€‚##æ˜¯è¿æ¥ç¬¦ï¼ŒæŠŠ##å‰åçš„ä¸¤ä¸ªå­—ç¬¦ä¸²è¿æ¥æˆä¸€ä¸ªå­—ç¬¦ä¸²ã€‚
 #ifdef CONFIG_WIN32
 #define int64_t_C(c) (c##i64)
 #define uint64_t_C(c) (c##i64)
@@ -46,12 +46,12 @@ typedef unsigned long long uint64_t;
 #define uint64_t_C(c) (c##ULL)
 #endif
 
-// ¶¨Òå×î´óµÄ64 Î»ÕûÊı¡£
+// å®šä¹‰æœ€å¤§çš„64 ä½æ•´æ•°ã€‚
 #ifndef INT64_MAX
 #define INT64_MAX int64_t_C(9223372036854775807)
 #endif
 
-// ´óĞ¡Ğ´Ãô¸ĞµÄ×Ö·û´®±È½Ïº¯Êı¡£ÔÚffplayÖĞÖ»¹ØĞÄÊÇ·ñÏàµÈ£¬²»¹ØĞÄË­´óË­Ğ¡¡£
+// å¤§å°å†™æ•æ„Ÿçš„å­—ç¬¦ä¸²æ¯”è¾ƒå‡½æ•°ã€‚åœ¨ffplayä¸­åªå…³å¿ƒæ˜¯å¦ç›¸ç­‰ï¼Œä¸å…³å¿ƒè°å¤§è°å°ã€‚
 static int strcasecmp(char *s1, const char *s2) {
     while (toupper((unsigned char)*s1) == toupper((unsigned char)*s2++))
         if (*s1++ == '\0')
@@ -60,9 +60,9 @@ static int strcasecmp(char *s1, const char *s2) {
     return (toupper((unsigned char)*s1) - toupper((unsigned char)*--s2));
 }
 
-// ÏŞ·ùº¯Êı£¬Õâ¸öº¯ÊıÊ¹ÓÃ¼òµ¥µÄ±È½ÏÂß¼­À´ÊµÏÖ£¬±È½ÏÓï¾ä¶à£¬ÈİÒ×ÖĞ¶ÏCPU
-// µÄÖ¸ÁîÁ÷Ë®Ïß£¬µ¼ÖÂĞÔÄÜµÍÏÂ¡£ Èç¹û±äÁ¿a
-// µÄÈ¡Öµ·¶Î§±È½ÏĞ¡£¬¿ÉÒÔÓÃ³£¹æµÄ¿Õ¼ä»»Ê±¼äµÄ²é±í·½·¨À´ÓÅ»¯¡£
+// é™å¹…å‡½æ•°ï¼Œè¿™ä¸ªå‡½æ•°ä½¿ç”¨ç®€å•çš„æ¯”è¾ƒé€»è¾‘æ¥å®ç°ï¼Œæ¯”è¾ƒè¯­å¥å¤šï¼Œå®¹æ˜“ä¸­æ–­CPU
+// çš„æŒ‡ä»¤æµæ°´çº¿ï¼Œå¯¼è‡´æ€§èƒ½ä½ä¸‹ã€‚ å¦‚æœå˜é‡a
+// çš„å–å€¼èŒƒå›´æ¯”è¾ƒå°ï¼Œå¯ä»¥ç”¨å¸¸è§„çš„ç©ºé—´æ¢æ—¶é—´çš„æŸ¥è¡¨æ–¹æ³•æ¥ä¼˜åŒ–ã€‚
 static inline int clip(int a, int amin, int amax) {
     if (a < amin)
         return amin;

@@ -1,7 +1,7 @@
 #ifndef DSPUTIL_H
 #define DSPUTIL_H
 
-// ¶¨Òådsp ÓÅ»¯ÏÞ·ùÔËËãÊ¹ÓÃµÄ²éÕÒ±í¼°Æä³õÊ¼»¯º¯Êý¡£
+// å®šä¹‰dsp ä¼˜åŒ–é™å¹…è¿ç®—ä½¿ç”¨çš„æŸ¥æ‰¾è¡¨åŠå…¶åˆå§‹åŒ–å‡½æ•°ã€‚
 #define MAX_NEG_CROP 1024
 
 extern uint8_t cropTbl[256 + 2 * MAX_NEG_CROP];
